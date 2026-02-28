@@ -24,19 +24,29 @@
         section { display: none; }
         section.active { display: block; }
 
-        /* Grid & Items */
         .lp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
         @media (max-width: 600px) { .lp-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; } }
         
-        .lp-item { position: relative; aspect-ratio: 1/1; background: #000; border-radius: 8px; overflow: hidden; cursor: pointer; transition: 0.3s; border: 2px solid transparent; }
-        .lp-item img { width: 100%; height: 100%; object-fit: cover; transition: 0.3s; }
+        .lp-item { position: relative; aspect-ratio: 1/1; background: #000; border-radius: 8px; overflow: hidden; cursor: pointer; transition: 0.2s; border: 3px solid transparent; }
+        .lp-item img { width: 100%; height: 100%; object-fit: cover; transition: 0.2s; }
         
-        /* ✅ 더 밝고 화사하게 투명해지는 효과 */
-        .is-dimmed { opacity: 0.45 !important; filter: brightness(1.8) contrast(0.8) blur(0.5px); }
+        /* ✅ 미보유/미발매: 밝고 뽀얀 투명도 */
+        .is-dimmed { opacity: 0.45 !important; filter: brightness(1.7) contrast(0.8); }
         
-        /* 선택 모드 스타일 */
-        .lp-item.selected { border-color: var(--accent); transform: scale(0.95); }
-        .select-badge { position: absolute; top: 8px; right: 8px; width: 20px; height: 20px; background: var(--accent); color: #000; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; z-index: 5; }
+        /* ✅ 편집 모드 시각화 강화 */
+        .lp-item.selected { border-color: var(--accent) !important; transform: scale(0.92); z-index: 10; box-shadow: 0 0 15px rgba(187,134,252,0.4); }
+        .lp-item.selected img { filter: brightness(1.1); }
+        
+        /* 편집 모드일 때 선택 안 된 것들 살짝 어둡게 */
+        .edit-active .lp-item:not(.selected) { opacity: 0.5; filter: grayscale(0.5); }
+
+        .select-badge { 
+            position: absolute; top: 10px; right: 10px; width: 26px; height: 26px; 
+            background: var(--accent); color: #000; border-radius: 50%; 
+            display: none; align-items: center; justify-content: center; 
+            font-size: 16px; font-weight: bold; z-index: 20;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
         .lp-item.selected .select-badge { display: flex; }
 
         input, select, textarea { width: 100%; padding: 14px; background: #151515; border: 1px solid #333; border-radius: 8px; color: #fff; margin-bottom: 10px; font-size: 14px; }
@@ -47,8 +57,7 @@
         .spinner { width: 30px; height: 30px; border: 3px solid #333; border-top: 3px solid var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 10px; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* 일괄 삭제 바 */
-        #batchBar { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: var(--nav-bg); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 150; border-top: 1px solid var(--border); }
+        #batchBar { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: var(--nav-bg); backdrop-filter: blur(15px); display: none; align-items: center; justify-content: space-between; padding: 0 25px; z-index: 150; border-top: 2px solid var(--accent); }
 
         #detail { position: fixed; inset: 0; background: #000; z-index: 1000; display: none; overflow-y: auto; }
         .back-btn { position: fixed; top: 20px; left: 20px; z-index: 1100; background: rgba(0,0,0,0.6); color: #fff; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 1px solid #444; cursor: pointer; }
@@ -73,11 +82,11 @@
 <div id="app" style="display: none;">
     <nav>
         <div class="nav-left">
-            <button onclick="go('list')" id="nav-list" class="active">목록보기</button>
-            <button onclick="go('add')" id="nav-add">추가하기</button>
+            <button onclick="go('list')" id="nav-list" class="active">목록</button>
+            <button onclick="go('add')" id="nav-add">추가</button>
         </div>
         <div class="nav-right">
-            <button id="editModeBtn" onclick="toggleEditMode()">편집</button>
+            <button id="editModeBtn" onclick="toggleEditMode()" style="color:var(--accent);">편집</button>
             <button onclick="logout()" style="font-size:11px; opacity:0.5;">로그아웃</button>
         </div>
     </nav>
@@ -102,7 +111,7 @@
             <input type="hidden" id="editId">
             <label style="display:flex; align-items:center; gap:10px; background:#1a1a1a; padding:15px; border-radius:8px; margin-bottom:15px; cursor:pointer; border: 1px solid #333;">
                 <input type="checkbox" id="owned" checked style="width:auto; margin:0;">
-                <span>현재 보유 중 (해제 시 흐릿하게 표시)</span>
+                <span>보유 중 (해제 시 혹은 미발매 시 흐릿하게 표시)</span>
             </label>
             <input type="file" id="file" accept="image/*">
             <input type="text" id="t" placeholder="앨범 제목">
@@ -118,17 +127,17 @@
                 <div style="grid-column: span 2;"><label>구매가(현지)</label><input type="number" id="pp_raw" placeholder="0"></div>
             </div>
             <div style="display:flex; gap:10px;"><div style="flex:1;"><label>발매일</label><input type="date" id="rd"></div><div style="flex:1;"><label>구매일</label><input type="date" id="pd"></div></div>
-            <textarea id="m" rows="4" placeholder="메모를 입력하세요..."></textarea>
-            <button onclick="save()" style="width:100%; padding:18px; background:var(--accent); color:#000; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">저장하기</button>
+            <textarea id="m" rows="4" placeholder="메모..."></textarea>
+            <button onclick="save()" style="width:100%; padding:18px; background:var(--accent); color:#000; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">바이닐 저장</button>
         </section>
     </main>
 </div>
 
 <div id="batchBar">
-    <div id="batchCount" style="font-weight:bold;">0개 선택됨</div>
-    <div style="display:flex; gap:10px;">
-        <button onclick="toggleEditMode()" style="background:none; border:none; color:#fff;">취소</button>
-        <button onclick="batchDelete()" style="background:var(--danger); border:none; color:#fff; padding:8px 20px; border-radius:6px; font-weight:bold;">삭제하기</button>
+    <div id="batchCount" style="font-weight:bold; color:var(--accent); font-size:18px;">0개 선택됨</div>
+    <div style="display:flex; gap:15px;">
+        <button onclick="toggleEditMode()" style="background:none; border:none; color:#fff; font-weight:bold;">취소</button>
+        <button onclick="batchDelete()" style="background:var(--danger); border:none; color:#fff; padding:12px 25px; border-radius:10px; font-weight:bold; box-shadow:0 4px 10px rgba(255,85,85,0.3);">삭제하기</button>
     </div>
 </div>
 
@@ -163,14 +172,14 @@
     let currentFilter = 'All', currentStatus = 'All', activeId = null;
     let currentSortKey = 'id', isAscending = false;
 
-    if(localStorage.getItem('vinyl_auth_v8') === 'true') { window.addEventListener('load', startApp); } 
+    if(localStorage.getItem('vinyl_auth_v8_1') === 'true') { window.addEventListener('load', startApp); } 
     else { window.addEventListener('load', () => { document.getElementById('loginView').style.display = 'block'; }); }
 
     function doLogin() {
-        if(document.getElementById('pw').value === MY_PASSWORD) { localStorage.setItem('vinyl_auth_v8', 'true'); startApp(); } 
+        if(document.getElementById('pw').value === MY_PASSWORD) { localStorage.setItem('vinyl_auth_v8_1', 'true'); startApp(); } 
         else alert('비밀번호가 틀렸습니다.');
     }
-    function logout() { localStorage.removeItem('vinyl_auth_v8'); location.reload(); }
+    function logout() { localStorage.removeItem('vinyl_auth_v8_1'); location.reload(); }
 
     async function startApp() {
         document.getElementById('loginView').style.display = 'none';
@@ -184,20 +193,28 @@
         document.getElementById('loader').style.display = 'none';
     }
 
-    // 일괄 편집 모드 토글
     function toggleEditMode() {
         isEditMode = !isEditMode;
         selectedIds = [];
         document.getElementById('editModeBtn').innerText = isEditMode ? "취소" : "편집";
         document.getElementById('batchBar').style.display = isEditMode ? "flex" : "none";
         document.getElementById('batchCount').innerText = "0개 선택됨";
+        
+        // 그리드에 편집 모드 클래스 토글
+        const grid = document.getElementById('grid-view');
+        if(isEditMode) grid.classList.add('edit-active');
+        else grid.classList.remove('edit-active');
+        
         render();
     }
 
     function handleItemClick(id) {
         if (isEditMode) {
-            if (selectedIds.includes(id)) selectedIds = selectedIds.filter(x => x !== id);
-            else selectedIds.push(id);
+            if (selectedIds.includes(id)) {
+                selectedIds = selectedIds.filter(x => x !== id);
+            } else {
+                selectedIds.push(id);
+            }
             document.getElementById('batchCount').innerText = `${selectedIds.length}개 선택됨`;
             render();
         } else {
@@ -206,10 +223,10 @@
     }
 
     async function batchDelete() {
-        if (selectedIds.length === 0) return;
-        if (confirm(`${selectedIds.length}개의 항목을 삭제하시겠습니까?`)) {
+        if (selectedIds.length === 0) { alert("삭제할 항목을 선택해주세요."); return; }
+        if (confirm(`${selectedIds.length}개의 항목을 한꺼번에 삭제하시겠습니까?`)) {
             document.getElementById('loader').style.display = 'flex';
-            // 시트 백엔드에서 반복 처리를 위해 전송
+            document.getElementById('loadMsg').innerText = "일괄 삭제 중...";
             for (let id of selectedIds) {
                 await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id }) });
             }
