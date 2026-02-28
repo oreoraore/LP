@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VINYL ARCHIVE</title>
     <style>
-        :root { --bg: #0b0b0b; --card: #1a1a1a; --text: #eee; --accent: #bb86fc; --dim: #888; --nav-bg: rgba(0,0,0,0.9); --border: #333; }
+        :root { --bg: #0b0b0b; --card: #1a1a1a; --text: #eee; --accent: #bb86fc; --dim: #888; --nav-bg: rgba(0,0,0,0.9); --border: #333; --danger: #ff5555; }
         * { box-sizing: border-box; font-family: -apple-system, "Malgun Gothic", sans-serif; }
         body { margin: 0; background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.6; -webkit-tap-highlight-color: transparent; }
         
@@ -24,13 +24,20 @@
         section { display: none; }
         section.active { display: block; }
 
+        /* Grid & Items */
         .lp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
         @media (max-width: 600px) { .lp-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; } }
-        .lp-item { aspect-ratio: 1/1; background: #000; border-radius: 8px; overflow: hidden; cursor: pointer; transition: 0.3s; }
-        .lp-item img { width: 100%; height: 100%; object-fit: cover; }
         
-        /* ✅ 밝게 투명해지는 효과 (밝기 상향 조정) */
-        .is-dimmed { opacity: 0.35 !important; filter: brightness(1.4); }
+        .lp-item { position: relative; aspect-ratio: 1/1; background: #000; border-radius: 8px; overflow: hidden; cursor: pointer; transition: 0.3s; border: 2px solid transparent; }
+        .lp-item img { width: 100%; height: 100%; object-fit: cover; transition: 0.3s; }
+        
+        /* ✅ 더 밝고 화사하게 투명해지는 효과 */
+        .is-dimmed { opacity: 0.45 !important; filter: brightness(1.8) contrast(0.8) blur(0.5px); }
+        
+        /* 선택 모드 스타일 */
+        .lp-item.selected { border-color: var(--accent); transform: scale(0.95); }
+        .select-badge { position: absolute; top: 8px; right: 8px; width: 20px; height: 20px; background: var(--accent); color: #000; border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; z-index: 5; }
+        .lp-item.selected .select-badge { display: flex; }
 
         input, select, textarea { width: 100%; padding: 14px; background: #151515; border: 1px solid #333; border-radius: 8px; color: #fff; margin-bottom: 10px; font-size: 14px; }
         label { font-size: 11px; color: #888; margin-bottom: 4px; display: block; }
@@ -39,6 +46,9 @@
         #loader { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; color: var(--accent); }
         .spinner { width: 30px; height: 30px; border: 3px solid #333; border-top: 3px solid var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 10px; }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* 일괄 삭제 바 */
+        #batchBar { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: var(--nav-bg); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 150; border-top: 1px solid var(--border); }
 
         #detail { position: fixed; inset: 0; background: #000; z-index: 1000; display: none; overflow-y: auto; }
         .back-btn { position: fixed; top: 20px; left: 20px; z-index: 1100; background: rgba(0,0,0,0.6); color: #fff; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: 1px solid #444; cursor: pointer; }
@@ -51,7 +61,7 @@
 </head>
 <body>
 
-<div id="loader"><div class="spinner"></div><div id="loadMsg">Processing...</div></div>
+<div id="loader"><div class="spinner"></div><div id="loadMsg">처리 중...</div></div>
 
 <div id="loginView" style="display: none;">
     <div style="text-align: center; padding-top: 35vh;">
@@ -66,7 +76,10 @@
             <button onclick="go('list')" id="nav-list" class="active">목록보기</button>
             <button onclick="go('add')" id="nav-add">추가하기</button>
         </div>
-        <div class="nav-right"><button onclick="logout()" style="font-size:11px; opacity:0.5;">로그아웃</button></div>
+        <div class="nav-right">
+            <button id="editModeBtn" onclick="toggleEditMode()">편집</button>
+            <button onclick="logout()" style="font-size:11px; opacity:0.5;">로그아웃</button>
+        </div>
     </nav>
 
     <div id="sortBar" class="sort-bar">
@@ -75,7 +88,6 @@
             <button class="sort-btn" onclick="sortData('artist')">가수순</button>
             <button class="sort-btn" onclick="sortData('title')">앨범순</button>
             <button class="sort-btn" onclick="sortData('release_date')">출시일순</button>
-            <button class="sort-btn" onclick="sortData('purchase_date')">구매일순</button>
             <button id="filterBtn" class="sort-btn" onclick="filterCountry()">국가: 전체</button>
             <button id="statusBtn" class="sort-btn" onclick="filterStatus()">상태: 전체</button>
         </div>
@@ -88,43 +100,36 @@
         <section id="add">
             <h2 id="formTitle" style="font-size:18px; margin:30px 0 15px;">정보 입력</h2>
             <input type="hidden" id="editId">
-            
             <label style="display:flex; align-items:center; gap:10px; background:#1a1a1a; padding:15px; border-radius:8px; margin-bottom:15px; cursor:pointer; border: 1px solid #333;">
                 <input type="checkbox" id="owned" checked style="width:auto; margin:0;">
-                <span>현재 보유 중 (체크 해제 시 흐릿하게 표시)</span>
+                <span>현재 보유 중 (해제 시 흐릿하게 표시)</span>
             </label>
-            
-            <label>커버 이미지</label>
             <input type="file" id="file" accept="image/*">
             <input type="text" id="t" placeholder="앨범 제목">
             <input type="text" id="a" placeholder="아티스트">
-            <label>제조국</label>
-            <select id="country">
-                <option value="한국">한국</option><option value="일본">일본</option><option value="미국">미국</option><option value="유럽">유럽</option><option value="기타">기타</option>
-            </select>
-            
+            <select id="country"><option value="한국">한국</option><option value="일본">일본</option><option value="미국">미국</option><option value="유럽">유럽</option><option value="기타">기타</option></select>
             <div class="price-group">
-                <div style="grid-column: span 2; font-size: 11px; color: var(--accent); margin-bottom: 5px;">출시가 설정</div>
-                <div><label>통화</label><select id="l_curr"><option value="₩">₩</option><option value="¥">¥</option><option value="$">$</option></select></div>
-                <div><label>환율</label><input type="number" id="l_ex" step="0.01" value="1.00"></div>
-                <div style="grid-column: span 2;"><label>금액(현지)</label><input type="number" id="lp_raw" placeholder="0"></div>
-                
-                <div style="grid-column: span 2; border-top: 1px solid #222; margin: 5px 0; padding-top: 10px; font-size: 11px; color: var(--accent);">구매가 설정</div>
-                <div><label>통화</label><select id="p_curr"><option value="₩">₩</option><option value="¥">¥</option><option value="$">$</option></select></div>
-                <div><label>환율</label><input type="number" id="p_ex" step="0.01" value="1.00"></div>
-                <div style="grid-column: span 2;"><label>금액(현지)</label><input type="number" id="pp_raw" placeholder="0"></div>
+                <div><label>출시 통화</label><select id="l_curr"><option value="₩">₩</option><option value="¥">¥</option><option value="$">$</option></select></div>
+                <div><label>출시 환율</label><input type="number" id="l_ex" step="0.01" value="1.00"></div>
+                <div style="grid-column: span 2;"><label>출시가(현지)</label><input type="number" id="lp_raw" placeholder="0"></div>
+                <div style="grid-column: span 2; border-top: 1px solid #222; margin: 5px 0; padding-top: 10px;"></div>
+                <div><label>구매 통화</label><select id="p_curr"><option value="₩">₩</option><option value="¥">¥</option><option value="$">$</option></select></div>
+                <div><label>구매 환율</label><input type="number" id="p_ex" step="0.01" value="1.00"></div>
+                <div style="grid-column: span 2;"><label>구매가(현지)</label><input type="number" id="pp_raw" placeholder="0"></div>
             </div>
-
-            <div style="display:flex; gap:10px;">
-                <div style="flex:1;"><label>발매일</label><input type="date" id="rd"></div>
-                <div style="flex:1;"><label>구매일</label><input type="date" id="pd"></div>
-            </div>
-
-            <label>메모</label>
+            <div style="display:flex; gap:10px;"><div style="flex:1;"><label>발매일</label><input type="date" id="rd"></div><div style="flex:1;"><label>구매일</label><input type="date" id="pd"></div></div>
             <textarea id="m" rows="4" placeholder="메모를 입력하세요..."></textarea>
             <button onclick="save()" style="width:100%; padding:18px; background:var(--accent); color:#000; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">저장하기</button>
         </section>
     </main>
+</div>
+
+<div id="batchBar">
+    <div id="batchCount" style="font-weight:bold;">0개 선택됨</div>
+    <div style="display:flex; gap:10px;">
+        <button onclick="toggleEditMode()" style="background:none; border:none; color:#fff;">취소</button>
+        <button onclick="batchDelete()" style="background:var(--danger); border:none; color:#fff; padding:8px 20px; border-radius:6px; font-weight:bold;">삭제하기</button>
+    </div>
 </div>
 
 <div id="detail">
@@ -132,13 +137,9 @@
     <div class="d-container">
         <div class="d-img-side"><img id="di" src=""></div>
         <div class="d-info-side">
-            <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <div id="dc" style="background:var(--accent); color:#000; padding:4px 10px; border-radius:4px; font-size:11px; font-weight:bold;"></div>
-                <div id="ds" style="background:#444; color:#fff; padding:4px 10px; border-radius:4px; font-size:11px; font-weight:bold;"></div>
-            </div>
+            <div style="display:flex; gap:10px; margin-bottom:15px;"><div id="dc" style="background:var(--accent); color:#000; padding:4px 10px; border-radius:4px; font-size:11px; font-weight:bold;"></div><div id="ds" style="background:#444; color:#fff; padding:4px 10px; border-radius:4px; font-size:11px; font-weight:bold;"></div></div>
             <h1 id="dt" style="font-size:32px; margin:0; line-height:1.2;"></h1>
             <p id="da" style="font-size:20px; color:var(--dim); margin:5px 0 25px;"></p>
-            
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:20px; border-bottom:1px solid #222; padding-bottom:20px;">
                 <div><label>출시가</label><div id="dlp" style="font-size:16px; font-weight:bold; color:var(--accent);"></div><div id="dlp_krw" style="font-size:12px; color:#888;"></div></div>
                 <div><label>구매가</label><div id="dpp" style="font-size:16px; font-weight:bold; color:var(--accent);"></div><div id="dpp_krw" style="font-size:12px; color:#888;"></div></div>
@@ -148,7 +149,7 @@
             <div id="dm" style="background:#151515; padding:20px; border-radius:10px; border-left:4px solid var(--accent); white-space:pre-wrap; font-size:14px; margin-bottom:30px; color:#ccc;"></div>
             <div style="display:flex; gap:10px;">
                 <button onclick="startEdit()" style="flex:1; padding:18px; background:#222; color:#fff; border:1px solid #444; border-radius:10px; font-weight:bold;">수정</button>
-                <button id="delBtn" style="flex:1; padding:18px; background:transparent; color:#ff5555; border:1px solid #ff5555; border-radius:10px; font-weight:bold;">삭제</button>
+                <button id="delSingleBtn" style="flex:1; padding:18px; background:transparent; color:var(--danger); border:1px solid var(--danger); border-radius:10px; font-weight:bold;">삭제</button>
             </div>
         </div>
     </div>
@@ -158,17 +159,18 @@
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwjp9soR-s225GM7FGr_Dw9ld7-8tfxng2MhOYESQ1a9VwucZyX3svFd0zBE3NOQeqS/exec'; 
     const MY_PASSWORD = '142857';
 
-    let items = [], currentFilter = 'All', currentStatus = 'All', activeId = null;
+    let items = [], selectedIds = [], isEditMode = false;
+    let currentFilter = 'All', currentStatus = 'All', activeId = null;
     let currentSortKey = 'id', isAscending = false;
 
-    if(localStorage.getItem('vinyl_auth_v7') === 'true') { window.addEventListener('load', startApp); } 
+    if(localStorage.getItem('vinyl_auth_v8') === 'true') { window.addEventListener('load', startApp); } 
     else { window.addEventListener('load', () => { document.getElementById('loginView').style.display = 'block'; }); }
 
     function doLogin() {
-        if(document.getElementById('pw').value === MY_PASSWORD) { localStorage.setItem('vinyl_auth_v7', 'true'); startApp(); } 
+        if(document.getElementById('pw').value === MY_PASSWORD) { localStorage.setItem('vinyl_auth_v8', 'true'); startApp(); } 
         else alert('비밀번호가 틀렸습니다.');
     }
-    function logout() { localStorage.removeItem('vinyl_auth_v7'); location.reload(); }
+    function logout() { localStorage.removeItem('vinyl_auth_v8'); location.reload(); }
 
     async function startApp() {
         document.getElementById('loginView').style.display = 'none';
@@ -180,6 +182,39 @@
         document.getElementById('loader').style.display = 'flex';
         try { const res = await fetch(WEB_APP_URL); items = await res.json(); sortData('id'); } catch(e){}
         document.getElementById('loader').style.display = 'none';
+    }
+
+    // 일괄 편집 모드 토글
+    function toggleEditMode() {
+        isEditMode = !isEditMode;
+        selectedIds = [];
+        document.getElementById('editModeBtn').innerText = isEditMode ? "취소" : "편집";
+        document.getElementById('batchBar').style.display = isEditMode ? "flex" : "none";
+        document.getElementById('batchCount').innerText = "0개 선택됨";
+        render();
+    }
+
+    function handleItemClick(id) {
+        if (isEditMode) {
+            if (selectedIds.includes(id)) selectedIds = selectedIds.filter(x => x !== id);
+            else selectedIds.push(id);
+            document.getElementById('batchCount').innerText = `${selectedIds.length}개 선택됨`;
+            render();
+        } else {
+            openD(id);
+        }
+    }
+
+    async function batchDelete() {
+        if (selectedIds.length === 0) return;
+        if (confirm(`${selectedIds.length}개의 항목을 삭제하시겠습니까?`)) {
+            document.getElementById('loader').style.display = 'flex';
+            // 시트 백엔드에서 반복 처리를 위해 전송
+            for (let id of selectedIds) {
+                await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id }) });
+            }
+            location.reload();
+        }
     }
 
     async function compressImage(file) {
@@ -237,8 +272,15 @@
             const isNotOwned = String(i.owned) === "false";
             let isFuture = false;
             if (i.release_date) { const rd = new Date(i.release_date); if (rd > today) isFuture = true; }
+            
             const dimClass = (isNotOwned || isFuture) ? 'is-dimmed' : '';
-            return `<div class="lp-item ${dimClass}" onclick="openD('${i.id}')"><img src="${i.image}" loading="lazy"></div>`;
+            const selectedClass = selectedIds.includes(i.id) ? 'selected' : '';
+            
+            return `
+                <div class="lp-item ${dimClass} ${selectedClass}" onclick="handleItemClick('${i.id}')">
+                    <div class="select-badge">✓</div>
+                    <img src="${i.image}" loading="lazy">
+                </div>`;
         }).join('');
     }
 
@@ -250,25 +292,20 @@
         document.getElementById('dc').innerText = i.country;
         document.getElementById('ds').innerText = String(i.owned) === "true" ? "보유 중" : "미보유";
         
-        // ✅ 원화 체크 로직 강화 (undefined 방지)
         const lRate = i.l_curr === '₩' ? 1 : Number(i.l_ex || 1);
         const pRate = i.p_curr === '₩' ? 1 : Number(i.p_ex || 1);
         
         document.getElementById('dlp').innerText = `${i.l_curr || '₩'} ${Number(i.list_price || 0).toLocaleString()}`;
         document.getElementById('dpp').innerText = `${i.p_curr || '₩'} ${Number(i.purchase_price || 0).toLocaleString()}`;
         
-        // 원화가 아닐 때만 환산 가격 노출
-        if(i.l_curr && i.l_curr !== '₩') document.getElementById('dlp_krw').innerText = `(약 ₩ ${Math.round(i.list_price * lRate).toLocaleString()})`;
-        else document.getElementById('dlp_krw').innerText = "";
-        
-        if(i.p_curr && i.p_curr !== '₩') document.getElementById('dpp_krw').innerText = `(약 ₩ ${Math.round(i.purchase_price * pRate).toLocaleString()})`;
-        else document.getElementById('dpp_krw').innerText = "";
+        document.getElementById('dlp_krw').innerText = (i.l_curr && i.l_curr !== '₩') ? `(약 ₩ ${Math.round(i.list_price * lRate).toLocaleString()})` : "";
+        document.getElementById('dpp_krw').innerText = (i.p_curr && i.p_curr !== '₩') ? `(약 ₩ ${Math.round(i.purchase_price * pRate).toLocaleString()})` : "";
 
         document.getElementById('drd').innerText = i.release_date ? i.release_date.substring(0,10) : "-";
         document.getElementById('dpd').innerText = i.purchase_date ? i.purchase_date.substring(0,10) : "-";
         document.getElementById('dm').innerText = i.memo || "";
         document.getElementById('detail').style.display = 'block';
-        document.getElementById('delBtn').onclick = () => deleteItem(i.id);
+        document.getElementById('delSingleBtn').onclick = () => deleteItem(i.id);
     }
 
     function closeD() { document.getElementById('detail').style.display = 'none'; }
@@ -315,6 +352,7 @@
     }
 
     async function deleteItem(id) { if(confirm('삭제하시겠습니까?')) { document.getElementById('loader').style.display = 'flex'; await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id }) }); location.reload(); } }
+    
     function go(id) {
         document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
