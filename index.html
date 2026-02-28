@@ -3,47 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vinyl Archive Ultimate</title>
+    <title>Vinyl Archive Pro</title>
     <style>
         :root { --bg: #000; --card: #121212; --text: #fff; --accent: #bb86fc; --dim: #aaa; --nav-bg: rgba(0,0,0,0.85); }
-        * { box-sizing: border-box; font-family: -apple-system, sans-serif; transition: background 0.2s; }
+        * { box-sizing: border-box; font-family: -apple-system, "Malgun Gothic", sans-serif; transition: background 0.2s; }
         body { margin: 0; background: var(--bg); color: var(--text); font-size: 18px; }
         .fade-in { opacity: 0; animation: fadeIn 0.4s forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 네비게이션 & 정렬바 */
         nav { position: fixed; top: 0; width: 100%; height: 60px; background: var(--nav-bg); backdrop-filter: blur(12px); display: flex; justify-content: space-around; align-items: center; z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.1); }
         nav button { background: none; border: none; color: var(--text); font-weight: bold; cursor: pointer; font-size: 16px; }
+
+        /* 정렬 및 필터바 */
         .sort-bar { position: fixed; top: 60px; width: 100%; background: var(--bg); padding: 10px; display: flex; gap: 8px; overflow-x: auto; z-index: 90; border-bottom: 1px solid #222; }
-        .sort-btn { white-space: nowrap; padding: 6px 12px; border-radius: 20px; background: var(--card); border: 1px solid #333; color: var(--dim); font-size: 14px; cursor: pointer; }
-        .sort-btn.active { border-color: var(--accent); color: var(--accent); }
+        .sort-btn { white-space: nowrap; padding: 6px 14px; border-radius: 20px; background: var(--card); border: 1px solid #333; color: var(--dim); font-size: 13px; cursor: pointer; }
+        .sort-btn.active { border-color: var(--accent); color: var(--accent); font-weight: bold; }
 
         main { padding: 130px 15px 40px; max-width: 900px; margin: 0 auto; }
         section { display: none; }
         section.active { display: block; }
 
-        /* 그리드 */
         .lp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         @media (max-width: 600px) { .lp-grid { grid-template-columns: repeat(2, 1fr); } }
-        .lp-item { aspect-ratio: 1/1; background: var(--card); border-radius: 8px; overflow: hidden; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+        .lp-item { aspect-ratio: 1/1; background: var(--card); border-radius: 8px; overflow: hidden; cursor: pointer; position: relative; }
         .lp-item img { width: 100%; height: 100%; object-fit: cover; }
+        .flag-badge { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; font-size: 12px; }
 
-        /* 입력 폼 */
         .f-group { margin-bottom: 15px; }
         label { display: block; color: var(--dim); margin-bottom: 5px; font-size: 14px; }
         input, textarea, select { width: 100%; padding: 14px; background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--text); font-size: 16px; }
         .save-btn { width: 100%; padding: 16px; background: var(--accent); color: #000; border: none; border-radius: 10px; font-weight: bold; font-size: 18px; cursor: pointer; }
 
-        /* 상세보기 모달 */
+        /* 상세보기 */
         #detail { position: fixed; inset: 0; background: var(--bg); z-index: 500; display: none; flex-direction: column; overflow-y: auto; }
         .d-container { display: flex; flex-direction: row; min-height: 100vh; }
         .d-img-side { flex: 0 0 45%; max-width: 500px; position: sticky; top: 0; height: 100vh; background: #000; display: flex; align-items: center; }
         .d-img-side img { width: 100%; object-fit: contain; }
         .d-info-side { flex: 1; padding: 40px; position: relative; }
-        .dt-title { font-size: 32px; font-weight: 800; color: var(--accent); margin: 0; }
+        .dt-country { display: inline-block; padding: 4px 10px; background: var(--accent); color: #000; border-radius: 5px; font-size: 14px; font-weight: bold; margin-bottom: 15px; }
+        .dt-title { font-size: 32px; font-weight: 800; color: #fff; margin: 0; }
         .dt-artist { font-size: 22px; color: var(--dim); margin: 5px 0 25px 0; }
         .dt-memo { font-size: 18px; line-height: 1.7; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 25px; }
         @media (max-width: 800px) { .d-container { flex-direction: column; } .d-img-side { height: auto; position: relative; max-width: 100%; } .d-info-side { padding: 25px; } }
+        
         .back-btn-fixed { position: fixed; bottom: 20px; left: 20px; padding: 12px 25px; border-radius: 30px; background: #333; color: #fff; border: none; cursor: pointer; z-index: 600; font-weight: bold; }
         .delete-btn { background: #ff4444; color: #fff; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; margin-top: 40px; float: right; }
 
@@ -57,7 +59,7 @@
 
 <div id="loginView">
     <div class="login-card fade-in">
-        <h2 style="color:#fff; margin-bottom:20px; letter-spacing:3px;">VINYL ARCHIVE</h2>
+        <h2 style="color:#fff; margin-bottom:20px;">VINYL ARCHIVE</h2>
         <input type="password" id="pw" style="padding:15px; border-radius:10px; text-align:center;" placeholder="Password" onkeyup="if(event.keyCode==13)doLogin()">
     </div>
 </div>
@@ -71,10 +73,9 @@
 
     <div id="sortBar" class="sort-bar">
         <button class="sort-btn active" onclick="sortData('id')">최신순</button>
-        <button class="sort-btn" onclick="sortData('artist')">가수순</button>
+        <button class="sort-btn" onclick="sortData('artist')">가수순(한/일/영)</button>
         <button class="sort-btn" onclick="sortData('price_val')">가격순</button>
-        <button class="sort-btn" onclick="sortData('release_date')">발매일순</button>
-        <button class="sort-btn" onclick="sortData('purchase_date')">구매일순</button>
+        <button class="sort-btn" onclick="filterCountry()">국적 필터링</button>
     </div>
 
     <main class="fade-in">
@@ -85,6 +86,16 @@
             <div class="f-group"><label>앨범 자켓</label><input type="file" id="file" accept="image/*"></div>
             <div class="f-group"><input type="text" id="t" placeholder="앨범명"></div>
             <div class="f-group"><input type="text" id="a" placeholder="가수명"></div>
+            <div class="f-group">
+                <label>국적</label>
+                <select id="country">
+                    <option value="한국">한국</option>
+                    <option value="일본">일본</option>
+                    <option value="미국">미국</option>
+                    <option value="영국">영국</option>
+                    <option value="기타">기타</option>
+                </select>
+            </div>
             <div style="display:flex; gap:10px;" class="f-group">
                 <select id="currency" style="flex:1;" onchange="toggleExRate()">
                     <option value="KRW">₩ (원)</option><option value="USD">$ (달러)</option><option value="JPY">¥ (엔)</option>
@@ -113,6 +124,7 @@
     <div class="d-container fade-in">
         <div class="d-img-side"><img id="di" src=""></div>
         <div class="d-info-side">
+            <span id="dc" class="dt-country"></span>
             <h1 id="dt" class="dt-title"></h1>
             <p id="da" class="dt-artist"></p>
             <div id="dm" class="dt-memo"></div>
@@ -128,9 +140,10 @@
 </div>
 
 <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwBmF8bfLnEXS02I1mRWdEPPF1Plm_llqBIk_pfiojNPHOeu8umqvW6OEC0siwQi1P1/exec'; 
-    const MY_PASSWORD = '4h2s4g8hsg!';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyE8m3_RhZi_djJheGilaaKq0PkdCr3uCoXTDRjd5dtbiPkY0tUjoMKNn2aUv4hQdy4/exec'; 
+    const MY_PASSWORD = '142857';
     let items = [];
+    let currentFilter = 'All';
 
     function doLogin() {
         if(document.getElementById('pw').value === MY_PASSWORD) {
@@ -141,60 +154,63 @@
     }
 
     async function load() {
-    const loader = document.getElementById('loader');
-    loader.style.display = 'flex';
-    
-    try {
-        console.log("데이터 요청 시작:", WEB_APP_URL);
+        document.getElementById('loader').style.display = 'flex';
         const res = await fetch(WEB_APP_URL);
-        
-        if (!res.ok) throw new Error('네트워크 응답 에러');
-        
-        const data = await res.json();
-        console.log("받은 데이터:", data);
-
-        // 데이터가 배열인지 확인하고, 아니면 빈 배열로 초기화
-        items = Array.isArray(data) ? data : [];
-        
-        // 가격 숫자 추출 로직 보강
+        items = await res.json();
         items.forEach(i => {
-            if (i.price && typeof i.price === 'string') {
-                const match = i.price.match(/₩([\d,]+)/);
-                i.price_val = match ? parseInt(match[1].replace(/,/g, '')) : 0;
-            } else {
-                i.price_val = 0;
-            }
+            const match = i.price.match(/₩([\d,]+)/);
+            i.price_val = match ? parseInt(match[1].replace(/,/g, '')) : 0;
+            // 날짜 연월일 포맷팅
+            i.release_date = i.release_date ? i.release_date.split('T')[0] : '';
+            i.purchase_date = i.purchase_date ? i.purchase_date.split('T')[0] : '';
         });
-        
-        sortData('id'); 
-        
-    } catch(e) { 
-        console.error("상세 에러:", e);
-        alert('시트 연결 실패! 권한 설정이나 URL을 확인해주세요.\n에러내용: ' + e.message);
-        // 에러가 나도 '처리 중' 화면은 닫아줌
-        document.getElementById('list').classList.add('active'); 
-    } finally {
-        loader.style.display = 'none';
-        // 로그인 성공 후 앱 화면 강제 표시
-        document.getElementById('app').style.display = 'block';
+        sortData('id');
+        document.getElementById('loader').style.display = 'none';
     }
-}
-    function sortData(key) {
-        // 정렬 버튼 상태 변경
-        document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
-        event?.target?.classList?.add('active');
 
+    // 가수명 정렬: 한글(가-힣) -> 일본어(Hiragana/Katakana) -> 영어(A-Z)
+    function getSortPriority(str) {
+        if (!str) return 999;
+        const char = str.charCodeAt(0);
+        if (char >= 0xAC00 && char <= 0xD7A3) return 1; // 한글
+        if ((char >= 0x3040 && char <= 0x309F) || (char >= 0x30A0 && char <= 0x30FF)) return 2; // 일본어
+        if ((char >= 65 && char <= 90) || (char >= 97 && char <= 122)) return 3; // 영어
+        return 4;
+    }
+
+    function sortData(key) {
         items.sort((a, b) => {
+            if (key === 'artist') {
+                const pA = getSortPriority(a.artist);
+                const pB = getSortPriority(b.artist);
+                if (pA !== pB) return pA - pB;
+                return a.artist.localeCompare(b.artist);
+            }
             if (key === 'id' || key === 'price_val' || key === 'release_date' || key === 'purchase_date') {
                 return (b[key] > a[key]) ? 1 : -1;
             }
-            return a[key].localeCompare(b[key]); // 글자 정렬
+            return a[key].localeCompare(b[key]);
         });
         render();
     }
 
+    function filterCountry() {
+        const countries = ['All', ...new Set(items.map(i => i.country))];
+        const nextIdx = (countries.indexOf(currentFilter) + 1) % countries.length;
+        currentFilter = countries[nextIdx];
+        alert(`필터링: ${currentFilter}`);
+        render();
+    }
+
     function render() {
-        document.getElementById('grid').innerHTML = items.map(i => `<div class="lp-item fade-in" onclick="openD('${i.id}')"><img src="${i.image}"></div>`).join('');
+        const grid = document.getElementById('grid');
+        const filtered = currentFilter === 'All' ? items : items.filter(i => i.country === currentFilter);
+        grid.innerHTML = filtered.map(i => `
+            <div class="lp-item fade-in" onclick="openD('${i.id}')">
+                <img src="${i.image}">
+                <div class="flag-badge">${i.country}</div>
+            </div>
+        `).join('');
     }
 
     function toggleExRate() {
@@ -209,7 +225,6 @@
         const cur = document.getElementById('currency').value;
         const raw = parseFloat(document.getElementById('price_raw').value) || 0;
         const rate = parseFloat(document.getElementById('ex_rate').value) || 1;
-        
         let pText = (cur === 'KRW') ? `₩${raw.toLocaleString()}` : `${cur==='USD'?'$':'¥'}${raw.toLocaleString()} (₩${Math.round(raw*rate).toLocaleString()})`;
 
         const r = new FileReader();
@@ -219,7 +234,7 @@
                 title: document.getElementById('t').value, artist: document.getElementById('a').value,
                 price: pText, release_date: document.getElementById('rd').value,
                 purchase_date: document.getElementById('pd').value, memo: document.getElementById('m').value,
-                image: e.target.result
+                image: e.target.result, country: document.getElementById('country').value
             };
             await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(data) });
             location.reload();
@@ -232,6 +247,7 @@
         document.getElementById('di').src = i.image;
         document.getElementById('dt').innerText = i.title;
         document.getElementById('da').innerText = i.artist;
+        document.getElementById('dc').innerText = i.country;
         document.getElementById('dm').innerHTML = i.memo.replace(/\n/g, '<br>');
         document.getElementById('dp').innerText = "가격: " + i.price;
         document.getElementById('drd').innerText = "발매일: " + (i.release_date || '-');
@@ -259,8 +275,3 @@
 </script>
 </body>
 </html>
-
-
-
-
-
