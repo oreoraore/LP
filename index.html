@@ -46,15 +46,15 @@
         }
 
         .dt-country { display: inline-block; padding: 4px 10px; background: var(--accent); color: #000; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 15px; width: fit-content; }
-        .dt-title { font-size: 26px; font-weight: 800; color: #fff; margin: 0; line-height: 1.2; }
-        .dt-artist { font-size: 18px; color: var(--dim); margin: 8px 0 20px 0; }
+        .dt-title { font-size: 24px; font-weight: 800; color: #fff; margin: 0; line-height: 1.2; }
+        .dt-artist { font-size: 17px; color: var(--dim); margin: 8px 0 20px 0; }
         
         .dt-price-box { margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 20px; }
         .dt-price-item { margin-bottom: 10px; }
-        .dt-label { font-size: 12px; color: var(--dim); display: block; }
-        .dt-val { font-size: 19px; font-weight: bold; color: var(--accent); }
+        .dt-label { font-size: 11px; color: var(--dim); display: block; text-transform: uppercase; }
+        .dt-val { font-size: 18px; font-weight: bold; color: var(--accent); }
 
-        .dt-memo { font-size: 16px; line-height: 1.7; color: #ccc; background: #151515; padding: 18px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid var(--accent); }
+        .dt-memo { font-size: 15px; line-height: 1.7; color: #ccc; background: #151515; padding: 18px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid var(--accent); }
         
         .f-group { margin-bottom: 15px; }
         label { display: block; color: var(--dim); margin-bottom: 5px; font-size: 13px; }
@@ -68,6 +68,7 @@
         #loader { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 2000; color: #fff; flex-direction: column; gap: 10px; }
         .spinner { width: 30px; height: 30px; border: 3px solid #333; border-top: 3px solid var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        .back-btn-fixed { position: fixed; bottom: 20px; left: 20px; padding: 12px 25px; border-radius: 40px; background: #333; color: #fff; border: none; cursor: pointer; z-index: 600; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -91,8 +92,8 @@
     <div id="sortBar" class="sort-bar">
         <button class="sort-btn active" onclick="sortData('id')">등록순</button>
         <button class="sort-btn" onclick="sortData('artist')">가수순</button>
-        <button class="sort-btn" onclick="sortData('list_price_krw')">출고가순(원화)</button>
-        <button class="sort-btn" onclick="sortData('purchase_price_krw')">구매가순(원화)</button>
+        <button class="sort-btn" onclick="sortData('list_price_krw')">출고가순</button>
+        <button class="sort-btn" onclick="sortData('purchase_price_krw')">구매가순</button>
         <button class="sort-btn" onclick="sortData('release_date')">발매일순</button>
         <button id="filterBtn" class="sort-btn" onclick="filterCountry()">나라: All</button>
     </div>
@@ -107,17 +108,17 @@
             <div class="f-group"><input type="text" id="t" placeholder="앨범 제목"></div>
             <div class="f-group"><input type="text" id="a" placeholder="아티스트명"></div>
             <div class="f-group">
-                <label>구매 국가 (화폐 기준)</label>
-                <select id="country" onchange="toggleRateInput()">
+                <label>구매 국가</label>
+                <select id="country" onchange="updateRatePlaceholder()">
                     <option value="한국">한국 (₩)</option>
                     <option value="일본">일본 (¥)</option>
                     <option value="미국">미국 ($)</option>
                     <option value="기타">기타</option>
                 </select>
             </div>
-            <div id="rateBox" class="f-group" style="display:none;">
-                <label>적용 환율 (1단위당 원화)</label>
-                <input type="number" id="ex_rate" step="0.01" placeholder="엔화면 약 9.1 / 달러면 약 1350">
+            <div class="f-group">
+                <label>적용 환율 (1단위당 원화 가격)</label>
+                <input type="number" id="ex_rate" step="0.01" placeholder="예: 9.1 (엔화), 1350 (달러)">
             </div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;" class="f-group">
                 <div><label>출고가 (현지)</label><input type="number" id="lp_raw" placeholder="0"></div>
@@ -127,9 +128,9 @@
                 <div><label>발매일</label><input type="date" id="rd"></div>
                 <div><label>구매일</label><input type="date" id="pd"></div>
             </div>
-            <div class="f-group"><textarea id="m" rows="4" placeholder="메모 (감상평 등)"></textarea></div>
-            <button class="save-btn" id="saveBtn" onclick="save()">저장하기</button>
-            <button class="save-btn" id="cancelBtn" style="background:#444; color:#fff; margin-top:10px; display:none;" onclick="location.reload()">수정 취소</button>
+            <div class="f-group"><textarea id="m" rows="4" placeholder="메모 (가격 밑에 표시됨)"></textarea></div>
+            <button class="save-btn" id="saveBtn" onclick="save()">컬렉션 저장</button>
+            <button class="save-btn" id="cancelBtn" style="background:#444; color:#fff; margin-top:10px; display:none;" onclick="location.reload()">취소</button>
         </section>
 
         <section id="set">
@@ -148,18 +149,18 @@
             
             <div class="dt-price-box">
                 <div class="dt-price-item">
-                    <span class="dt-label">출고가</span>
+                    <span class="dt-label">List Price</span>
                     <span id="dlp" class="dt-val"></span>
                 </div>
                 <div class="dt-price-item">
-                    <span class="dt-label">구매가</span>
+                    <span class="dt-label">Purchase Price</span>
                     <span id="dpp" class="dt-val"></span>
                 </div>
             </div>
 
             <div id="dm" class="dt-memo"></div>
             
-            <div style="font-size:13px; color:var(--dim); margin-bottom:20px;">
+            <div style="font-size:12px; color:var(--dim); margin-bottom:20px;">
                 <p id="drd" style="margin:2px 0;"></p>
                 <p id="dpd" style="margin:2px 0;"></p>
             </div>
@@ -183,7 +184,7 @@
         if(document.getElementById('pw').value === MY_PASSWORD) {
             sessionStorage.setItem('vinyl_auth', 'true');
             startApp();
-        } else alert('비밀번호 오류');
+        } else alert('비밀번호 불일치');
     }
     function logout() { sessionStorage.removeItem('vinyl_auth'); location.reload(); }
 
@@ -207,15 +208,12 @@
         document.getElementById('loader').style.display = 'none';
     }
 
-    function toggleRateInput() {
-        const country = document.getElementById('country').value;
-        const rateBox = document.getElementById('rateBox');
-        if(country === '한국') {
-            document.getElementById('ex_rate').value = 1;
-            rateBox.style.display = 'none';
-        } else {
-            rateBox.style.display = 'block';
-        }
+    function updateRatePlaceholder() {
+        const c = document.getElementById('country').value;
+        const rateInput = document.getElementById('ex_rate');
+        if(c === '한국') { rateInput.value = 1; }
+        else if(c === '일본') { rateInput.placeholder = "예: 9.1"; }
+        else if(c === '미국') { rateInput.placeholder = "예: 1350"; }
     }
 
     function sortData(key) {
@@ -253,7 +251,7 @@
     async function save() {
         const title = document.getElementById('t').value;
         const editId = document.getElementById('editId').value;
-        if(!title) return alert('제목은 필수입니다.');
+        if(!title) return alert('제목을 입력해주세요.');
 
         document.getElementById('loader').style.display = 'flex';
         const fileInput = document.getElementById('file');
@@ -269,7 +267,8 @@
         const payload = {
             action: editId ? 'edit' : 'add',
             id: editId || Date.now(),
-            title: title, artist: document.getElementById('a').value,
+            title: title, 
+            artist: document.getElementById('a').value,
             list_price: document.getElementById('lp_raw').value || 0,
             purchase_price: document.getElementById('pp_raw').value || 0,
             release_date: document.getElementById('rd').value,
@@ -293,13 +292,18 @@
         document.getElementById('dt').innerText = i.title;
         document.getElementById('da').innerText = i.artist;
         document.getElementById('dc').innerText = i.country;
+        
+        // 가격 병기 (현지통화 + 원화)
         document.getElementById('dlp').innerText = i.list_price_display;
         document.getElementById('dpp').innerText = i.purchase_price_display;
-        document.getElementById('dm').innerHTML = (i.memo || '메모 없음').replace(/\n/g, '<br>');
-        document.getElementById('drd').innerText = "발매일: " + (i.release_date || '-');
-        document.getElementById('dpd').innerText = "구매일: " + (i.purchase_date || '-');
+        
+        document.getElementById('dm').innerHTML = (i.memo || '작성된 메모가 없습니다.').replace(/\n/g, '<br>');
+        document.getElementById('drd').innerText = "RELEASE: " + (i.release_date || '-');
+        document.getElementById('dpd').innerText = "PURCHASE: " + (i.purchase_date || '-');
+        
         document.getElementById('delBtn').onclick = () => deleteItem(i.id);
         document.getElementById('editActionBtn').onclick = () => startEdit(i.id);
+        
         document.getElementById('detail').style.display = 'block';
         document.body.style.overflow = 'hidden';
     }
@@ -308,12 +312,11 @@
         const i = items.find(x => x.id == id);
         closeD();
         go('add');
-        document.getElementById('formTitle').innerText = "정보 수정";
+        document.getElementById('formTitle').innerText = "EDIT INFO";
         document.getElementById('editId').value = i.id;
         document.getElementById('t').value = i.title;
         document.getElementById('a').value = i.artist;
         document.getElementById('country').value = i.country;
-        toggleRateInput();
         document.getElementById('ex_rate').value = i.ex_rate;
         document.getElementById('lp_raw').value = i.list_price;
         document.getElementById('pp_raw').value = i.purchase_price;
