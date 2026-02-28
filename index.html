@@ -141,18 +141,28 @@
     }
 
     async function load() {
-        document.getElementById('loader').style.display = 'flex';
+    const loader = document.getElementById('loader');
+    loader.style.display = 'flex';
+    try {
         const res = await fetch(WEB_APP_URL);
-        items = await res.json();
-        // 가격 정렬을 위해 숫자값 미리 추출
+        const data = await res.json();
+        
+        // 데이터가 비어있어도 진행되도록 처리
+        items = Array.isArray(data) ? data : [];
+        
         items.forEach(i => {
-            const match = i.price.match(/₩([\d,]+)/);
+            const match = i.price ? i.price.match(/₩([\d,]+)/) : null;
             i.price_val = match ? parseInt(match[1].replace(/,/g, '')) : 0;
         });
-        sortData('id'); // 기본 최신순
-        document.getElementById('loader').style.display = 'none';
+        
+        sortData('id'); 
+    } catch(e) { 
+        console.error(e);
+        alert('구글 시트 연결에 실패했습니다. URL과 권한 설정을 확인해주세요.'); 
+    } finally {
+        loader.style.display = 'none';
     }
-
+}
     function sortData(key) {
         // 정렬 버튼 상태 변경
         document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
@@ -233,4 +243,5 @@
 </script>
 </body>
 </html>
+
 
