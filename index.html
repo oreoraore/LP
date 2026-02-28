@@ -32,7 +32,7 @@
         .lp-item img { width: 100%; height: 100%; object-fit: cover; }
         .flag-badge { position: absolute; bottom: 5px; right: 5px; background: rgba(0,0,0,0.7); padding: 2px 6px; border-radius: 4px; font-size: 10px; color: var(--accent); border: 1px solid var(--accent); }
 
-        /* 상세보기 (좌우 50:50) */
+        /* 상세보기 레이아웃 */
         #detail { position: fixed; inset: 0; background: #000; z-index: 500; display: none; overflow-y: auto; }
         .d-container { display: flex; min-height: 100vh; width: 100%; }
         .d-img-side { flex: 0 0 50%; background: #050505; display: flex; align-items: center; justify-content: center; position: sticky; top: 0; height: 100vh; padding: 20px; }
@@ -46,12 +46,15 @@
         }
 
         .dt-country { display: inline-block; padding: 4px 10px; background: var(--accent); color: #000; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 15px; width: fit-content; }
-        .dt-title { font-size: 28px; font-weight: 800; color: #fff; margin: 0; line-height: 1.2; }
-        .dt-artist { font-size: 18px; color: var(--dim); margin: 8px 0 25px 0; }
+        .dt-title { font-size: 26px; font-weight: 800; color: #fff; margin: 0; line-height: 1.2; }
+        .dt-artist { font-size: 18px; color: var(--dim); margin: 8px 0 20px 0; }
+        
         .dt-price-box { margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 20px; }
-        .dt-price-label { font-size: 13px; color: var(--dim); margin-bottom: 4px; }
-        .dt-price-val { font-size: 20px; font-weight: bold; color: var(--accent); margin-bottom: 10px; }
-        .dt-memo { font-size: 16px; line-height: 1.7; color: #ccc; background: #151515; padding: 18px; border-radius: 10px; margin-bottom: 25px; border-left: 4px solid var(--accent); }
+        .dt-price-item { margin-bottom: 10px; }
+        .dt-label { font-size: 12px; color: var(--dim); display: block; }
+        .dt-val { font-size: 19px; font-weight: bold; color: var(--accent); }
+
+        .dt-memo { font-size: 16px; line-height: 1.7; color: #ccc; background: #151515; padding: 18px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid var(--accent); }
         
         .f-group { margin-bottom: 15px; }
         label { display: block; color: var(--dim); margin-bottom: 5px; font-size: 13px; }
@@ -104,16 +107,21 @@
             <div class="f-group"><input type="text" id="t" placeholder="앨범 제목"></div>
             <div class="f-group"><input type="text" id="a" placeholder="아티스트명"></div>
             <div class="f-group">
-                <select id="country">
-                    <option value="한국">한국 (KRW)</option>
-                    <option value="일본">일본 (JPY)</option>
-                    <option value="미국">미국 (USD)</option>
+                <label>구매 국가 (화폐 기준)</label>
+                <select id="country" onchange="toggleRateInput()">
+                    <option value="한국">한국 (₩)</option>
+                    <option value="일본">일본 (¥)</option>
+                    <option value="미국">미국 ($)</option>
                     <option value="기타">기타</option>
                 </select>
             </div>
+            <div id="rateBox" class="f-group" style="display:none;">
+                <label>적용 환율 (1단위당 원화)</label>
+                <input type="number" id="ex_rate" step="0.01" placeholder="엔화면 약 9.1 / 달러면 약 1350">
+            </div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;" class="f-group">
-                <div><label>출고가 (List)</label><input type="number" id="lp_raw" placeholder="0"></div>
-                <div><label>구매가 (Purchase)</label><input type="number" id="pp_raw" placeholder="0"></div>
+                <div><label>출고가 (현지)</label><input type="number" id="lp_raw" placeholder="0"></div>
+                <div><label>구매가 (현지)</label><input type="number" id="pp_raw" placeholder="0"></div>
             </div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;" class="f-group">
                 <div><label>발매일</label><input type="date" id="rd"></div>
@@ -139,15 +147,19 @@
             <p id="da" class="dt-artist"></p>
             
             <div class="dt-price-box">
-                <div class="dt-price-label">출고가</div>
-                <div id="dlp" class="dt-price-val"></div>
-                <div class="dt-price-label">구매가</div>
-                <div id="dpp" class="dt-price-val"></div>
+                <div class="dt-price-item">
+                    <span class="dt-label">출고가</span>
+                    <span id="dlp" class="dt-val"></span>
+                </div>
+                <div class="dt-price-item">
+                    <span class="dt-label">구매가</span>
+                    <span id="dpp" class="dt-val"></span>
+                </div>
             </div>
 
             <div id="dm" class="dt-memo"></div>
             
-            <div style="font-size:13px; color:var(--dim);">
+            <div style="font-size:13px; color:var(--dim); margin-bottom:20px;">
                 <p id="drd" style="margin:2px 0;"></p>
                 <p id="dpd" style="margin:2px 0;"></p>
             </div>
@@ -161,8 +173,7 @@
 </div>
 
 <script>
-    // [필수] 본인의 URL과 비밀번호를 넣으세요
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbymb6M2AmhCZbs6hTtS25xXcD4jbQOBf4ZiEkFYou-hxfie6-9Q3JV7SZKBULmTbEM7/exec'; 
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyh0403eQ_LoFnYEMgr4L5f1fvQcY73wALTPqn53BvlfuTtK6XV2Y3uCDf9nF9uc1L9/exec'; 
     const MY_PASSWORD = '142857';
 
     let items = [];
@@ -187,7 +198,6 @@
         try {
             const res = await fetch(WEB_APP_URL);
             items = await res.json();
-            // 날짜 형식 정리 (문자열인 경우만 처리)
             items.forEach(i => {
                 if(i.release_date) i.release_date = String(i.release_date).split('T')[0];
                 if(i.purchase_date) i.purchase_date = String(i.purchase_date).split('T')[0];
@@ -195,6 +205,17 @@
             sortData('id');
         } catch(e) { alert("데이터 로드 실패"); }
         document.getElementById('loader').style.display = 'none';
+    }
+
+    function toggleRateInput() {
+        const country = document.getElementById('country').value;
+        const rateBox = document.getElementById('rateBox');
+        if(country === '한국') {
+            document.getElementById('ex_rate').value = 1;
+            rateBox.style.display = 'none';
+        } else {
+            rateBox.style.display = 'block';
+        }
     }
 
     function sortData(key) {
@@ -235,7 +256,6 @@
         if(!title) return alert('제목은 필수입니다.');
 
         document.getElementById('loader').style.display = 'flex';
-        
         const fileInput = document.getElementById('file');
         let imageData = "";
         if (fileInput.files.length > 0) {
@@ -249,15 +269,15 @@
         const payload = {
             action: editId ? 'edit' : 'add',
             id: editId || Date.now(),
-            title: title, 
-            artist: document.getElementById('a').value,
+            title: title, artist: document.getElementById('a').value,
             list_price: document.getElementById('lp_raw').value || 0,
             purchase_price: document.getElementById('pp_raw').value || 0,
             release_date: document.getElementById('rd').value,
             purchase_date: document.getElementById('pd').value, 
             memo: document.getElementById('m').value,
             image: imageData,
-            country: document.getElementById('country').value
+            country: document.getElementById('country').value,
+            ex_rate: document.getElementById('ex_rate').value || 1
         };
 
         try {
@@ -273,18 +293,13 @@
         document.getElementById('dt').innerText = i.title;
         document.getElementById('da').innerText = i.artist;
         document.getElementById('dc').innerText = i.country;
-        
-        // 가격 표시 (원화 단위 자동 표시 로직은 앱스 스크립트에서 처리된 display 값을 사용)
         document.getElementById('dlp').innerText = i.list_price_display;
         document.getElementById('dpp').innerText = i.purchase_price_display;
-
         document.getElementById('dm').innerHTML = (i.memo || '메모 없음').replace(/\n/g, '<br>');
         document.getElementById('drd').innerText = "발매일: " + (i.release_date || '-');
         document.getElementById('dpd').innerText = "구매일: " + (i.purchase_date || '-');
-        
         document.getElementById('delBtn').onclick = () => deleteItem(i.id);
         document.getElementById('editActionBtn').onclick = () => startEdit(i.id);
-        
         document.getElementById('detail').style.display = 'block';
         document.body.style.overflow = 'hidden';
     }
@@ -298,6 +313,8 @@
         document.getElementById('t').value = i.title;
         document.getElementById('a').value = i.artist;
         document.getElementById('country').value = i.country;
+        toggleRateInput();
+        document.getElementById('ex_rate').value = i.ex_rate;
         document.getElementById('lp_raw').value = i.list_price;
         document.getElementById('pp_raw').value = i.purchase_price;
         document.getElementById('rd').value = i.release_date;
