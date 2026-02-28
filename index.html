@@ -9,12 +9,15 @@
         * { box-sizing: border-box; font-family: -apple-system, "Malgun Gothic", sans-serif; }
         body { margin: 0; background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.6; }
         
+        /* 애니메이션 */
         .fade-in { opacity: 0; animation: fadeIn 0.3s forwards; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+        /* 상단 네비게이션 */
         nav { position: fixed; top: 0; width: 100%; height: 60px; background: var(--nav-bg); backdrop-filter: blur(15px); display: flex; justify-content: space-around; align-items: center; z-index: 100; border-bottom: 1px solid #333; }
         nav button { background: none; border: none; color: var(--text); font-weight: bold; cursor: pointer; font-size: 15px; padding: 10px; }
 
+        /* 정렬 바 */
         .sort-bar { position: fixed; top: 60px; width: 100%; background: var(--bg); padding: 10px; display: flex; gap: 6px; overflow-x: auto; z-index: 90; border-bottom: 1px solid #222; scrollbar-width: none; }
         .sort-bar::-webkit-scrollbar { display: none; }
         .sort-btn { white-space: nowrap; padding: 6px 14px; border-radius: 20px; background: var(--card); border: 1px solid #333; color: var(--dim); font-size: 12px; cursor: pointer; }
@@ -24,6 +27,7 @@
         section { display: none; }
         section.active { display: block; }
 
+        /* 리스트 그리드 (모바일 3열) */
         .lp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
         @media (max-width: 600px) { .lp-grid { grid-template-columns: repeat(3, 1fr); gap: 5px; } }
         
@@ -31,7 +35,7 @@
         .lp-item img { width: 100%; height: 100%; object-fit: cover; }
         .flag-badge { position: absolute; bottom: 5px; right: 5px; background: rgba(0,0,0,0.7); padding: 2px 6px; border-radius: 4px; font-size: 10px; color: var(--accent); border: 1px solid var(--accent); }
 
-        /* 상세보기 레이아웃 */
+        /* 상세보기 (Full Screen) */
         #detail { position: fixed; inset: 0; background: #000; z-index: 500; display: none; overflow-y: auto; }
         .d-container { display: flex; min-height: 100vh; width: 100%; }
         .d-img-side { flex: 0 0 50%; background: #050505; display: flex; align-items: center; justify-content: center; position: sticky; top: 0; height: 100vh; padding: 20px; }
@@ -44,32 +48,34 @@
             .d-info-side { flex: none; padding: 30px 20px; }
         }
 
+        /* 상세 정보 텍스트 스타일 */
         .dt-country { display: inline-block; padding: 4px 10px; background: var(--accent); color: #000; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 15px; width: fit-content; }
-        .dt-title { font-size: 24px; font-weight: 800; color: #fff; margin: 0; line-height: 1.2; }
-        .dt-artist { font-size: 17px; color: var(--dim); margin: 8px 0 20px 0; }
+        .dt-title { font-size: 26px; font-weight: 800; color: #fff; margin: 0; line-height: 1.2; }
+        .dt-artist { font-size: 18px; color: var(--dim); margin: 8px 0 25px 0; }
         
-        .dt-price-box { margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 20px; }
-        .dt-price-item { margin-bottom: 10px; }
-        .dt-label { font-size: 11px; color: var(--dim); display: block; text-transform: uppercase; }
+        .dt-price-box { margin-bottom: 20px; padding-bottom: 20px; }
+        .dt-price-item { margin-bottom: 8px; }
+        .dt-label { font-size: 11px; color: var(--dim); text-transform: uppercase; display: block; }
         .dt-val { font-size: 18px; font-weight: bold; color: var(--accent); }
 
-        /* 날짜 스타일 (메모 위로 이동 및 크기 조절) */
-        .dt-dates { margin-bottom: 15px; padding: 10px 0; border-top: 1px solid #222; }
-        .dt-date-text { font-size: 15px; color: #fff; margin: 4px 0; font-weight: 500; }
-        .dt-date-label { color: var(--dim); font-size: 13px; margin-right: 8px; }
+        /* 날짜 (메모 위로 이동 및 강조) */
+        .dt-dates-box { border-top: 1px solid #222; border-bottom: 1px solid #222; padding: 15px 0; margin-bottom: 20px; }
+        .dt-date-row { font-size: 16px; margin-bottom: 5px; color: #fff; }
+        .dt-date-label { color: var(--dim); margin-right: 10px; font-size: 14px; }
 
-        .dt-memo { font-size: 15px; line-height: 1.7; color: #ccc; background: #151515; padding: 18px; border-radius: 10px; margin-bottom: 25px; border-left: 4px solid var(--accent); }
+        .dt-memo { font-size: 15px; line-height: 1.7; color: #ccc; background: #151515; padding: 18px; border-radius: 10px; margin-bottom: 30px; border-left: 4px solid var(--accent); }
         
+        /* 폼 스타일 */
         .f-group { margin-bottom: 15px; }
         label { display: block; color: var(--dim); margin-bottom: 5px; font-size: 13px; }
         input, textarea, select { width: 100%; padding: 12px; background: var(--card); border: 1px solid #333; border-radius: 8px; color: var(--text); font-size: 15px; }
         .save-btn { width: 100%; padding: 15px; background: var(--accent); color: #000; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; }
         .btn-row { display: flex; gap: 10px; margin-top: 10px; }
-        .edit-btn { background: #333; color: #fff; border: 1px solid #444; padding: 12px; border-radius: 8px; cursor: pointer; flex: 1; font-weight: bold; font-size: 14px; }
-        .delete-btn { background: transparent; color: #aa3333; border: 1px solid #aa3333; padding: 12px; border-radius: 8px; cursor: pointer; flex: 1; font-weight: bold; font-size: 14px; }
+        .edit-btn { background: #333; color: #fff; border: 1px solid #444; padding: 12px; border-radius: 8px; flex: 1; font-weight: bold; }
+        .delete-btn { background: transparent; color: #ff5555; border: 1px solid #ff5555; padding: 12px; border-radius: 8px; flex: 1; font-weight: bold; }
+        .close-x { position: absolute; top: 20px; right: 20px; background: none; border: none; color: #fff; font-size: 28px; cursor: pointer; z-index: 600; }
 
-        .close-detail { position: absolute; top: 20px; right: 20px; background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; padding: 10px; z-index: 600; }
-
+        /* 로딩 & 로그인 */
         #loginView { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; align-items: center; justify-content: center; }
         #loader { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 2000; color: #fff; flex-direction: column; gap: 10px; }
         .spinner { width: 30px; height: 30px; border: 3px solid #333; border-top: 3px solid var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
@@ -134,7 +140,7 @@
                 <div><label>구매일</label><input type="date" id="pd"></div>
             </div>
             <div class="f-group"><textarea id="m" rows="4" placeholder="메모 (감상평 등)"></textarea></div>
-            <button class="save-btn" id="saveBtn" onclick="save()">저장하기</button>
+            <button class="save-btn" id="saveBtn" onclick="save()">컬렉션 저장</button>
             <button class="save-btn" id="cancelBtn" style="background:#444; color:#fff; margin-top:10px; display:none;" onclick="location.reload()">취소</button>
         </section>
 
@@ -145,7 +151,7 @@
 </div>
 
 <div id="detail">
-    <button class="close-detail" onclick="closeD()">✕</button>
+    <button class="close-x" onclick="closeD()">✕</button>
     <div class="d-container">
         <div class="d-img-side"><img id="di" src=""></div>
         <div class="d-info-side">
@@ -164,23 +170,24 @@
                 </div>
             </div>
 
-            <div class="dt-dates">
-                <div class="dt-date-text"><span class="dt-date-label">발매일</span><span id="drd"></span></div>
-                <div class="dt-date-text"><span class="dt-date-label">구매일</span><span id="dpd"></span></div>
+            <div class="dt-dates-box">
+                <div class="dt-date-row"><span class="dt-date-label">발매일:</span> <span id="drd"></span></div>
+                <div class="dt-date-row"><span class="dt-date-label">구매일:</span> <span id="dpd"></span></div>
             </div>
 
             <div id="dm" class="dt-memo"></div>
             
             <div class="btn-row">
-                <button class="edit-btn" id="editActionBtn">수정하기</button>
-                <button class="delete-btn" id="delBtn">삭제</button>
+                <button class="edit-btn" id="editActionBtn">정보 수정</button>
+                <button class="delete-btn" id="delBtn">앨범 삭제</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz0BB4Q6_CVXNYpqebtuTrAkPzXl2aMJKAeFzN0Y7gt4PfswzQOLenqyHmZAWGP04_j/exec'; 
+    // ⚠️ 여기에 본인의 URL과 비밀번호를 넣으세요
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzUDpKODTLE3tBWPG7TErf1nk8z6ThANuFX194wQE6Vlh_pK5tzu5k1S8LLjTwJTqp-/exec'; 
     const MY_PASSWORD = '142857';
 
     let items = [];
@@ -190,7 +197,7 @@
         if(document.getElementById('pw').value === MY_PASSWORD) {
             sessionStorage.setItem('vinyl_auth', 'true');
             startApp();
-        } else alert('비밀번호 오류');
+        } else alert('비밀번호가 틀렸습니다.');
     }
     function logout() { sessionStorage.removeItem('vinyl_auth'); location.reload(); }
 
@@ -249,7 +256,7 @@
     async function save() {
         const title = document.getElementById('t').value;
         const editId = document.getElementById('editId').value;
-        if(!title) return alert('제목 필수');
+        if(!title) return alert('제목은 꼭 입력해야 합니다.');
 
         document.getElementById('loader').style.display = 'flex';
         const fileInput = document.getElementById('file');
@@ -265,7 +272,8 @@
         const payload = {
             action: editId ? 'edit' : 'add',
             id: editId || Date.now(),
-            title: title, artist: document.getElementById('a').value,
+            title: title, 
+            artist: document.getElementById('a').value,
             list_price: document.getElementById('lp_raw').value || 0,
             purchase_price: document.getElementById('pp_raw').value || 0,
             release_date: document.getElementById('rd').value,
@@ -277,7 +285,7 @@
         };
 
         try {
-            await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
+            const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
             location.reload();
         } catch(err) { alert("저장 실패"); document.getElementById('loader').style.display = 'none'; }
     }
@@ -291,12 +299,9 @@
         document.getElementById('dc').innerText = i.country;
         document.getElementById('dlp').innerText = i.list_price_display;
         document.getElementById('dpp').innerText = i.purchase_price_display;
-        
-        // 날짜 텍스트 삽입
         document.getElementById('drd').innerText = i.release_date || '-';
         document.getElementById('dpd').innerText = i.purchase_date || '-';
-
-        document.getElementById('dm').innerHTML = (i.memo || '메모 없음').replace(/\n/g, '<br>');
+        document.getElementById('dm').innerHTML = (i.memo || '메모가 없습니다.').replace(/\n/g, '<br>');
         
         document.getElementById('delBtn').onclick = () => deleteItem(i.id);
         document.getElementById('editActionBtn').onclick = () => startEdit(i.id);
@@ -309,7 +314,7 @@
         const i = items.find(x => x.id == id);
         closeD();
         go('add');
-        document.getElementById('formTitle').innerText = "정보 수정";
+        document.getElementById('formTitle').innerText = "앨범 정보 수정";
         document.getElementById('editId').value = i.id;
         document.getElementById('t').value = i.title;
         document.getElementById('a').value = i.artist;
@@ -327,7 +332,7 @@
     function closeD() { document.getElementById('detail').style.display = 'none'; document.body.style.overflow = 'auto'; }
 
     async function deleteItem(id) {
-        if(!confirm('삭제하시겠습니까?')) return;
+        if(!confirm('정말로 이 앨범을 삭제할까요?')) return;
         document.getElementById('loader').style.display = 'flex';
         await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id }) });
         location.reload();
@@ -337,6 +342,12 @@
         document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.getElementById('sortBar').style.display = (id === 'list') ? 'flex' : 'none';
+        if(id === 'add') { // 등록 모드 초기화
+            document.getElementById('formTitle').innerText = "새 앨범 등록";
+            document.getElementById('editId').value = "";
+            document.getElementById('saveBtn').innerText = "컬렉션 저장";
+            document.getElementById('cancelBtn').style.display = "none";
+        }
         window.scrollTo(0,0);
     }
 
