@@ -16,6 +16,7 @@
         .view-toggle { font-size: 18px !important; opacity: 0.4; cursor: pointer; }
         .view-toggle.active { opacity: 1; color: var(--accent); }
 
+        /* Sort Bar */
         .sort-bar { position: fixed; top: 60px; width: 100%; background: var(--bg); padding: 10px; display: flex; align-items: center; gap: 6px; z-index: 90; border-bottom: 1px solid #222; }
         .sort-inner { display: flex; gap: 6px; overflow-x: auto; flex: 1; scrollbar-width: none; }
         .sort-inner::-webkit-scrollbar { display: none; }
@@ -27,8 +28,8 @@
         section { display: none; }
         section.active { display: block; }
 
-        /* 상태에 따른 투명도 클래스 */
-        .is-dimmed { opacity: 0.4 !important; filter: grayscale(0.5); }
+        /* Dimmed State */
+        .is-dimmed { opacity: 0.4 !important; filter: grayscale(0.8); }
 
         .lp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
         @media (max-width: 600px) { .lp-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; } }
@@ -102,9 +103,8 @@
         <div class="sort-inner">
             <button class="sort-btn active" onclick="sortData('id')">등록순</button>
             <button class="sort-btn" onclick="sortData('artist')">가수순</button>
-            <button class="sort-btn" onclick="sortData('release_date')">발매일순</button>
-            <button class="sort-btn" onclick="sortData('purchase_date')">구매일순</button>
             <button id="filterBtn" class="sort-btn" onclick="filterCountry()">나라: All</button>
+            <button id="statusBtn" class="sort-btn" onclick="filterStatus()">상태: All</button>
         </div>
         <div id="totalLabel" class="total-count">Total: 0</div>
     </div>
@@ -124,7 +124,7 @@
                 <span>현재 보유 중</span>
             </label>
 
-            <label>Cover Image</label>
+            <label>Cover Image (자동 압축 적용)</label>
             <input type="file" id="file" accept="image/*">
             <input type="text" id="t" placeholder="Album Title">
             <input type="text" id="a" placeholder="Artist">
@@ -193,11 +193,12 @@
 </div>
 
 <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyq8A2Y59NFGGjC0NEKVMIE8j0B_8tBc5FSxhRWL7DUlJVbdp5V1qYWSMqnJgDp9AW-/exec'; 
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwZ_E9d7j8DPG50vMhFDW6q8GMi86n1B4BmBuX1T5SXrJeyEeI7ZBhvp7WN24dbrdoH/exec'; 
     const MY_PASSWORD = '142857';
 
     let items = [];
     let currentFilter = 'All';
+    let currentStatus = 'All'; // 보유 필터 추가
     let currentView = localStorage.getItem('vinyl_view') || 'grid';
 
     function doLogin() { if(document.getElementById('pw').value === MY_PASSWORD) { sessionStorage.setItem('vinyl_auth', 'true'); startApp(); } else alert('Error'); }
@@ -216,6 +217,33 @@
             sortData('id');
         } catch(e) {}
         document.getElementById('loader').style.display = 'none';
+    }
+
+    // 이미지 압축 함수 (600px 너비 기준)
+    async function compressImage(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (e) => {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const max_size = 600;
+
+                    if (width > height) { if (width > max_size) { height *= max_size / width; width = max_size; } } 
+                    else { if (height > max_size) { width *= max_size / height; height = max_size; } }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', 0.8)); // 80% 화질로 압축
+                };
+            };
+        });
     }
 
     function switchView(type) {
@@ -247,15 +275,27 @@
         render();
     }
 
+    function filterStatus() {
+        const statuses = ['All', '보유', '미보유'];
+        currentStatus = statuses[(statuses.indexOf(currentStatus) + 1) % statuses.length];
+        document.getElementById('statusBtn').innerText = `상태: ${currentStatus}`;
+        render();
+    }
+
     function checkDimmed(item) {
         const today = new Date().toISOString().split('T')[0];
         const isUnreleased = item.release_date && item.release_date > today;
-        const isNotOwned = item.owned === false || item.owned === "false";
+        const isNotOwned = (item.owned === false || item.owned === "false");
         return isUnreleased || isNotOwned;
     }
 
     function render() {
-        const filtered = currentFilter === 'All' ? items : items.filter(i => i.country === currentFilter);
+        let filtered = currentFilter === 'All' ? items : items.filter(i => i.country === currentFilter);
+        
+        // 보유 필터링
+        if(currentStatus === '보유') filtered = filtered.filter(i => i.owned === true || i.owned === "true");
+        if(currentStatus === '미보유') filtered = filtered.filter(i => i.owned === false || i.owned === "false");
+
         document.getElementById('totalLabel').innerText = `Total: ${filtered.length}`;
 
         document.getElementById('grid-view').innerHTML = filtered.map(i => {
@@ -293,7 +333,6 @@
         document.getElementById('dc').innerText = i.country;
         document.getElementById('ds').innerText = (i.owned === true || i.owned === "true") ? "보유 중" : "미보유/미발매";
         
-        // 가격 표시 로직 (통화 기호 반영)
         const lCurr = i.l_curr || '₩';
         const pCurr = i.p_curr || '₩';
         document.getElementById('dlp').innerText = `출고가: ${lCurr}${Number(i.list_price).toLocaleString()}`;
@@ -313,14 +352,13 @@
         const editId = document.getElementById('editId').value;
         document.getElementById('loader').style.display = 'flex';
         const fileInput = document.getElementById('file');
+        
         let imageData = "";
+        // 수정 시 파일을 새로 선택하지 않았으면 기존 이미지 유지 (이 로직은 서버 스크립트에서 처리하거나 기존 i.image 전달 필요)
         if (fileInput.files.length > 0) {
-            imageData = await new Promise(resolve => {
-                const r = new FileReader();
-                r.onload = (e) => resolve(e.target.result);
-                r.readAsDataURL(fileInput.files[0]);
-            });
+            imageData = await compressImage(fileInput.files[0]);
         }
+        
         const payload = {
             action: editId ? 'edit' : 'add', id: editId || Date.now(),
             owned: document.getElementById('owned').checked,
