@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vinyl Archive v3</title>
+    <title>VINYL ARCHIVE</title>
     <style>
         :root { --bg: #0b0b0b; --card: #1a1a1a; --text: #eee; --accent: #bb86fc; --dim: #888; --nav-bg: rgba(0,0,0,0.9); }
         * { box-sizing: border-box; font-family: -apple-system, "Malgun Gothic", sans-serif; }
@@ -33,7 +33,6 @@
         input, textarea, select { width: 100%; padding: 15px; background: var(--card); border: 1px solid #333; border-radius: 10px; color: var(--text); font-size: 16px; }
         .save-btn { width: 100%; padding: 18px; background: var(--accent); color: #000; border: none; border-radius: 12px; font-weight: bold; font-size: 18px; cursor: pointer; margin-top: 10px; }
 
-        /* 상세보기 */
         #detail { position: fixed; inset: 0; background: var(--bg); z-index: 500; display: none; flex-direction: column; overflow-y: auto; }
         .d-container { display: flex; flex-direction: row; min-height: 100vh; }
         .d-img-side { flex: 0 0 45%; max-width: 500px; background: #000; display: flex; align-items: center; justify-content: center; position: sticky; top: 0; height: 100vh; }
@@ -60,7 +59,7 @@
 
 <div id="loginView">
     <div class="login-card fade-in">
-        <h2 style="color:#fff; margin-bottom:30px; letter-spacing:5px;">ARCHIVE</h2>
+        <h2 style="color:#fff; margin-bottom:30px; letter-spacing:5px;">VINYL ARCHIVE</h2>
         <input type="password" id="pw" style="padding:18px; border-radius:12px; text-align:center; width:260px;" placeholder="Password" onkeyup="if(event.keyCode==13)doLogin()">
     </div>
 </div>
@@ -139,7 +138,6 @@
 </div>
 
 <script>
-    // ⚠️ 수정 필수: 배포한 URL과 설정한 비밀번호
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw0bKPDQG02OcirqsYHZblI1k9DesGkX8ZuZNDFKItDYi7f3aHzm2zQdS1Csu82YbCL/exec'; 
     const MY_PASSWORD = '142857';
 
@@ -163,37 +161,40 @@
             items = Array.isArray(data) ? data : [];
             
             items.forEach(i => {
-                // 가격 숫자 추출
-                const match = String(i.price).match(/₩([\d,]+)/);
-                i.price_val = match ? parseInt(match[1].replace(/,/g, '')) : 0;
-                // 날짜 깔끔하게 (연-월-일)
+                // 가격 정렬용 숫자 추출 보강 (괄호 안의 원화 값을 찾아 정렬 기준으로 삼음)
+                if (String(i.price).includes('₩')) {
+                    const match = String(i.price).match(/₩([\d,]+)/);
+                    i.price_val = match ? parseInt(match[1].replace(/,/g, '')) : 0;
+                } else {
+                    i.price_val = 0;
+                }
+
                 if(i.release_date) i.release_date = String(i.release_date).split('T')[0];
                 if(i.purchase_date) i.purchase_date = String(i.purchase_date).split('T')[0];
             });
             sortData('id');
         } catch(e) {
             console.error(e);
-            alert("시트 데이터를 가져오지 못했습니다. URL과 배포 설정을 확인하세요.");
-            document.getElementById('app').style.display = 'block'; // 에러나도 일단 진입
+            alert("시트 데이터를 가져오지 못했습니다.");
+            document.getElementById('app').style.display = 'block';
         } finally {
             loader.style.display = 'none';
         }
     }
 
-    // 가수명 정렬 로직 (한글 -> 일본어 통합 -> 영어)
     function getSortPriority(str) {
         if (!str) return 999;
         const char = str.charCodeAt(0);
-        // 한글 (가-힣)
         if (char >= 0xAC00 && char <= 0xD7A3) return 1;
-        // 일본어 통합 (히라가나 0x3040-309F, 가타카나 0x30A0-30FF)
         if (char >= 0x3040 && char <= 0x30FF) return 2;
-        // 영어 (A-Z, a-z)
         if ((char >= 65 && char <= 90) || (char >= 97 && char <= 122)) return 3;
         return 4;
     }
 
     function sortData(key) {
+        document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+        if(event && event.target) event.target.classList.add('active');
+
         items.sort((a, b) => {
             if (key === 'artist') {
                 const pA = getSortPriority(a.artist);
@@ -246,7 +247,6 @@
         if(!f || !title) return alert('사진과 앨범명은 필수입니다.');
 
         document.getElementById('loader').style.display = 'flex';
-
         const cur = document.getElementById('currency').value;
         const raw = parseFloat(document.getElementById('price_raw').value) || 0;
         const rate = parseFloat(document.getElementById('ex_rate').value) || 1;
@@ -266,7 +266,7 @@
                 await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(data) });
                 location.reload();
             } catch(err) {
-                alert("저장 중 오류가 발생했습니다.");
+                alert("저장 실패");
                 document.getElementById('loader').style.display = 'none';
             }
         };
