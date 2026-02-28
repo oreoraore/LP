@@ -16,28 +16,28 @@
         .view-toggle { font-size: 18px !important; opacity: 0.4; cursor: pointer; }
         .view-toggle.active { opacity: 1; color: var(--accent); }
 
-        /* Sort Bar & Total */
         .sort-bar { position: fixed; top: 60px; width: 100%; background: var(--bg); padding: 10px; display: flex; align-items: center; gap: 6px; z-index: 90; border-bottom: 1px solid #222; }
         .sort-inner { display: flex; gap: 6px; overflow-x: auto; flex: 1; scrollbar-width: none; }
         .sort-inner::-webkit-scrollbar { display: none; }
         .sort-btn { white-space: nowrap; padding: 6px 12px; border-radius: 20px; background: var(--card); border: 1px solid var(--border); color: var(--dim); font-size: 11px; cursor: pointer; }
         .sort-btn.active { border-color: var(--accent); color: var(--accent); font-weight: bold; background: rgba(187,134,252,0.1); }
-        
-        /* Total Label Style */
         .total-count { font-size: 11px; color: var(--accent); font-weight: bold; padding-left: 10px; white-space: nowrap; border-left: 1px solid #333; margin-left: 5px; }
 
         main { padding: 130px 10px 40px; max-width: 1200px; margin: 0 auto; }
         section { display: none; }
         section.active { display: block; }
 
+        /* 상태에 따른 투명도 클래스 */
+        .is-dimmed { opacity: 0.4 !important; filter: grayscale(0.5); }
+
         .lp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
         @media (max-width: 600px) { .lp-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; } }
-        .lp-item { aspect-ratio: 1/1; background: #000; border-radius: 8px; overflow: hidden; cursor: pointer; }
+        .lp-item { aspect-ratio: 1/1; background: #000; border-radius: 8px; overflow: hidden; cursor: pointer; transition: 0.3s; }
         .lp-item img { width: 100%; height: 100%; object-fit: cover; }
 
         .lp-list { display: flex; flex-direction: column; background: var(--card); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
         .list-header { background: #111; padding: 12px 15px; display: grid; grid-template-columns: 60px 2fr 1.5fr 1fr 1fr; gap: 15px; font-size: 12px; color: var(--dim); font-weight: bold; border-bottom: 1px solid var(--border); }
-        .list-item { padding: 12px 15px; display: grid; grid-template-columns: 60px 2fr 1.5fr 1fr 1fr; gap: 15px; align-items: center; cursor: pointer; border-bottom: 1px solid #222; }
+        .list-item { padding: 12px 15px; display: grid; grid-template-columns: 60px 2fr 1.5fr 1fr 1fr; gap: 15px; align-items: center; cursor: pointer; border-bottom: 1px solid #222; transition: 0.3s; }
         .list-img { width: 50px; height: 50px; border-radius: 4px; object-fit: cover; }
         .list-title { color: #fff; font-weight: bold; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .list-artist { color: #bbb; font-size: 14px; }
@@ -65,7 +65,12 @@
 
         @media (max-width: 900px) { .d-container { flex-direction: column; } .d-img-side { flex: none; height: 45vh; position: relative; padding: 20px; } .d-info-side { flex: none; padding: 30px 20px 60px; } }
 
+        /* Form */
         input, select, textarea { width: 100%; padding: 14px; background: #151515; border: 1px solid #333; border-radius: 8px; color: #fff; margin-bottom: 10px; font-size: 14px; }
+        .form-row { display: flex; gap: 10px; margin-bottom: 5px; }
+        .currency-select { width: 80px !important; flex-shrink: 0; }
+        .check-container { display: flex; align-items: center; gap: 10px; background: #151515; padding: 14px; border-radius: 8px; border: 1px solid #333; margin-bottom: 10px; cursor: pointer; }
+        .check-container input { width: auto; margin: 0; cursor: pointer; }
         label { font-size: 12px; color: #777; margin-bottom: 4px; display: block; }
         #loader { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 2000; }
         .spinner { width: 25px; height: 25px; border: 3px solid #333; border-top: 3px solid var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
@@ -113,25 +118,43 @@
         <section id="add">
             <h2 id="formTitle">Add New Vinyl</h2>
             <input type="hidden" id="editId">
+            
+            <label class="check-container">
+                <input type="checkbox" id="owned" checked>
+                <span>현재 보유 중</span>
+            </label>
+
+            <label>Cover Image</label>
             <input type="file" id="file" accept="image/*">
             <input type="text" id="t" placeholder="Album Title">
             <input type="text" id="a" placeholder="Artist">
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <select id="country">
-                    <option value="한국">한국 (₩)</option><option value="일본">일본 (¥)</option><option value="미국">미국 ($)</option><option value="기타">기타</option>
-                </select>
-                <input type="number" id="ex_rate" step="0.01" placeholder="Exchange Rate">
+            
+            <label>제조국</label>
+            <select id="country">
+                <option value="한국">한국</option><option value="일본">일본</option><option value="미국">미국</option><option value="기타">기타</option>
+            </select>
+
+            <label>출고가 (List Price)</label>
+            <div class="form-row">
+                <select id="l_curr" class="currency-select"><option value="₩">₩</option><option value="¥">¥</option><option value="$">$</option><option value="€">€</option></select>
+                <input type="number" id="lp_raw" placeholder="0">
             </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <input type="number" id="lp_raw" placeholder="List Price">
-                <input type="number" id="pp_raw" placeholder="Purchase Price">
+
+            <label>구매가 (Purchase Price)</label>
+            <div class="form-row">
+                <select id="p_curr" class="currency-select"><option value="₩">₩</option><option value="¥">¥</option><option value="$">$</option><option value="€">€</option></select>
+                <input type="number" id="pp_raw" placeholder="0">
             </div>
+            
+            <label>적용 환율 (원화 기준)</label>
+            <input type="number" id="ex_rate" step="0.01" value="1.00">
+
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
                 <div><label>Release Date</label><input type="date" id="rd"></div>
                 <div><label>Purchase Date</label><input type="date" id="pd"></div>
             </div>
             <textarea id="m" rows="5" placeholder="Memo..."></textarea>
-            <button onclick="save()" style="width:100%; padding:18px; background:var(--accent); color:#000; border:none; border-radius:10px; font-weight:bold;">SAVE</button>
+            <button onclick="save()" style="width:100%; padding:18px; background:var(--accent); color:#000; border:none; border-radius:10px; font-weight:bold;">SAVE VINYL</button>
         </section>
 
         <section id="set">
@@ -145,7 +168,10 @@
     <div class="d-container">
         <div class="d-img-side"><img id="di" src=""></div>
         <div class="d-info-side">
-            <div id="dc" style="background:var(--accent); color:#000; padding:3px 8px; border-radius:4px; font-size:11px; width:fit-content; margin-bottom:12px;"></div>
+            <div style="display:flex; gap:10px; margin-bottom:12px;">
+                <div id="dc" style="background:var(--accent); color:#000; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:bold;"></div>
+                <div id="ds" style="background:#555; color:#fff; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:bold;"></div>
+            </div>
             <h1 id="dt" style="font-size:28px; margin:0;"></h1>
             <p id="da" style="font-size:18px; color:var(--dim); margin:8px 0 25px;"></p>
             <div style="border-bottom:1px solid #222; padding-bottom:15px; margin-bottom:15px;">
@@ -167,7 +193,7 @@
 </div>
 
 <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz8yngqZeBhW5XtqikbrLZ7G31fwTONHTxB3Ax3qBohm_AHmLysrsGdhyWPNWZjiWcA/exec'; 
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyq8A2Y59NFGGjC0NEKVMIE8j0B_8tBc5FSxhRWL7DUlJVbdp5V1qYWSMqnJgDp9AW-/exec'; 
     const MY_PASSWORD = '142857';
 
     let items = [];
@@ -221,18 +247,28 @@
         render();
     }
 
+    function checkDimmed(item) {
+        const today = new Date().toISOString().split('T')[0];
+        const isUnreleased = item.release_date && item.release_date > today;
+        const isNotOwned = item.owned === false || item.owned === "false";
+        return isUnreleased || isNotOwned;
+    }
+
     function render() {
         const filtered = currentFilter === 'All' ? items : items.filter(i => i.country === currentFilter);
-        
-        // Total 업데이트
         document.getElementById('totalLabel').innerText = `Total: ${filtered.length}`;
 
-        document.getElementById('grid-view').innerHTML = filtered.map(i => `<div class="lp-item" onclick="openD('${i.id}')"><img src="${i.image}" loading="lazy"></div>`).join('');
+        document.getElementById('grid-view').innerHTML = filtered.map(i => {
+            const dimmedClass = checkDimmed(i) ? 'is-dimmed' : '';
+            return `<div class="lp-item ${dimmedClass}" onclick="openD('${i.id}')"><img src="${i.image}" loading="lazy"></div>`;
+        }).join('');
 
         document.getElementById('list-view').innerHTML = `
             <div class="list-header"><div>Cover</div><div>Album</div><div>Artist</div><div>Released</div><div>Purchased</div></div>
-            ${filtered.map(i => `
-                <div class="list-item" onclick="openD('${i.id}')">
+            ${filtered.map(i => {
+                const dimmedClass = checkDimmed(i) ? 'is-dimmed' : '';
+                return `
+                <div class="list-item ${dimmedClass}" onclick="openD('${i.id}')">
                     <img src="${i.image}" class="list-img">
                     <div class="list-title">${i.title}</div>
                     <div class="list-artist">${i.artist || '-'}</div>
@@ -242,8 +278,8 @@
                         <span data-label="Rel.">${i.release_date || '-'}</span>
                         <span data-label="Pur.">${i.purchase_date || '-'}</span>
                     </div>
-                </div>
-            `).join('')}
+                </div>`;
+            }).join('')}
         `;
     }
 
@@ -255,8 +291,14 @@
         document.getElementById('dt').innerText = i.title;
         document.getElementById('da').innerText = i.artist;
         document.getElementById('dc').innerText = i.country;
-        document.getElementById('dlp').innerText = `정가: ${i.list_price_display}`;
-        document.getElementById('dpp').innerText = `구매: ${i.purchase_price_display}`;
+        document.getElementById('ds').innerText = (i.owned === true || i.owned === "true") ? "보유 중" : "미보유/미발매";
+        
+        // 가격 표시 로직 (통화 기호 반영)
+        const lCurr = i.l_curr || '₩';
+        const pCurr = i.p_curr || '₩';
+        document.getElementById('dlp').innerText = `출고가: ${lCurr}${Number(i.list_price).toLocaleString()}`;
+        document.getElementById('dpp').innerText = `구매가: ${pCurr}${Number(i.purchase_price).toLocaleString()}`;
+        
         document.getElementById('drd').innerText = i.release_date || '-';
         document.getElementById('dpd').innerText = i.purchase_date || '-';
         document.getElementById('dm').innerText = i.memo || '';
@@ -281,11 +323,14 @@
         }
         const payload = {
             action: editId ? 'edit' : 'add', id: editId || Date.now(),
+            owned: document.getElementById('owned').checked,
             title: document.getElementById('t').value, artist: document.getElementById('a').value,
-            list_price: document.getElementById('lp_raw').value, purchase_price: document.getElementById('pp_raw').value,
+            country: document.getElementById('country').value,
+            l_curr: document.getElementById('l_curr').value, list_price: document.getElementById('lp_raw').value,
+            p_curr: document.getElementById('p_curr').value, purchase_price: document.getElementById('pp_raw').value,
             release_date: document.getElementById('rd').value, purchase_date: document.getElementById('pd').value,
             memo: document.getElementById('m').value, image: imageData,
-            country: document.getElementById('country').value, ex_rate: document.getElementById('ex_rate').value
+            ex_rate: document.getElementById('ex_rate').value
         };
         await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
         location.reload();
@@ -295,14 +340,17 @@
         const i = items.find(x => x.id == activeId);
         closeD(); go('add');
         document.getElementById('editId').value = i.id;
+        document.getElementById('owned').checked = (i.owned === true || i.owned === "true");
         document.getElementById('t').value = i.title;
         document.getElementById('a').value = i.artist;
+        document.getElementById('country').value = i.country;
+        document.getElementById('l_curr').value = i.l_curr || '₩';
         document.getElementById('lp_raw').value = i.list_price;
+        document.getElementById('p_curr').value = i.p_curr || '₩';
         document.getElementById('pp_raw').value = i.purchase_price;
         document.getElementById('rd').value = i.release_date;
         document.getElementById('pd').value = i.purchase_date;
         document.getElementById('m').value = i.memo;
-        document.getElementById('country').value = i.country;
         document.getElementById('ex_rate').value = i.ex_rate;
         document.getElementById('formTitle').innerText = "Edit Vinyl Info";
     }
