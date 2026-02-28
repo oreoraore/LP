@@ -5,223 +5,227 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VINYL ARCHIVE</title>
     <style>
-        :root { --bg: #000000; --card: #121212; --text: #ffffff; --accent: #bb86fc; --dim: #777; --border: #2c2c2c; --danger: #cf6679; }
-        * { box-sizing: border-box; font-family: 'Pretendard', -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
-        body { margin: 0; background: var(--bg); color: var(--text); overflow-x: hidden; transition: 0.3s; }
-        
-        /* Navigation & Sections */
-        nav { position: fixed; top: 0; width: 100%; height: 60px; background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); display: flex; justify-content: space-between; align-items: center; z-index: 1000; border-bottom: 1px solid var(--border); padding: 0 15px; }
-        section { display: none; opacity: 0; transform: translateY(10px); transition: 0.4s ease; padding: 135px 15px 50px; max-width: 1400px; margin: 0 auto; }
-        section.active { display: block; opacity: 1; transform: translateY(0); }
-        .back-btn { background: none; border: 1px solid var(--border); color: #fff; padding: 5px 12px; border-radius: 5px; cursor: pointer; margin-right: 10px; }
+        :root { --bg: #000000; --card: #111111; --text: #ffffff; --accent: #bb86fc; --dim: #888; --border: #222; --danger: #ff4444; }
+        * { box-sizing: border-box; font-family: 'Pretendard', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg); color: var(--text); overflow-x: hidden; }
 
-        /* Toolbar & Sorting */
-        .toolbar { position: fixed; top: 60px; width: 100%; background: var(--bg); padding: 10px; display: flex; align-items: center; z-index: 900; border-bottom: 1px solid var(--border); overflow: hidden; }
-        .sort-scroll { display: flex; gap: 8px; overflow-x: auto; flex: 1; padding-right: 10px; scrollbar-width: none; }
-        .sort-scroll::-webkit-scrollbar { display: none; }
-        .btn-s { white-space: nowrap; padding: 7px 14px; border-radius: 20px; background: #1a1a1a; border: 1px solid var(--border); color: var(--dim); font-size: 11px; cursor: pointer; transition: 0.2s; }
-        .btn-s.active { border-color: var(--accent); color: var(--accent); background: rgba(187,134,252,0.15); font-weight: bold; }
-        .total-info { font-size: 11px; color: var(--accent); font-weight: 800; white-space: nowrap; border-left: 1px solid var(--border); padding-left: 12px; }
+        /* Animation & Transition */
+        .fade { animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Grid & Table */
-        .lp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        @media (min-width: 768px) { .lp-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; } }
-        .lp-item { position: relative; aspect-ratio: 1/1; background: #111; border-radius: 4px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+        /* Header & Nav */
+        nav { position: fixed; top: 0; width: 100%; height: 60px; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); display: flex; justify-content: space-between; align-items: center; z-index: 1000; border-bottom: 1px solid var(--border); padding: 0 15px; }
+        .back-btn { background: none; border: 1px solid var(--border); color: #fff; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: none; margin-right: 10px; }
+
+        /* Tool Bar & Sort */
+        .toolbar { position: fixed; top: 60px; width: 100%; background: var(--bg); z-index: 900; border-bottom: 1px solid var(--border); padding: 10px; display: flex; align-items: center; }
+        .sort-container { display: flex; gap: 8px; overflow-x: auto; flex: 1; padding-right: 10px; scrollbar-width: none; }
+        .sort-container::-webkit-scrollbar { display: none; }
+        .sort-btn { white-space: nowrap; padding: 6px 12px; border-radius: 15px; background: #1a1a1a; border: 1px solid var(--border); color: var(--dim); font-size: 11px; cursor: pointer; transition: 0.2s; }
+        .sort-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(187,134,252,0.1); font-weight: bold; }
+        .total-label { font-size: 12px; color: var(--accent); font-weight: bold; border-left: 1px solid var(--border); padding-left: 10px; white-space: nowrap; }
+
+        /* Content Area */
+        main { padding: 130px 15px 40px; max-width: 1200px; margin: 0 auto; }
+        section { display: none; }
+        section.active { display: block; }
+
+        /* Viewer: Grid & Table */
+        .lp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        @media (min-width: 768px) { .lp-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; } }
+        .lp-item { position: relative; aspect-ratio: 1/1; background: #080808; border-radius: 4px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: 0.3s; }
         .lp-item img { width: 100%; height: 100%; object-fit: cover; }
-        .lp-item.selected { border-color: var(--accent); transform: scale(0.92); }
-        .lp-item.selected::after { content: '✓'; position: absolute; top: 5px; right: 5px; background: var(--accent); color: #000; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; }
-        
-        /* Bright Transparency (미보유/미발매) */
-        .is-dimmed { opacity: 0.45; filter: brightness(1.6) grayscale(0.3); }
+        .lp-item.selected { border-color: var(--accent); opacity: 0.7; }
 
-        table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 8px; overflow: hidden; font-size: 13px; }
-        th, td { padding: 15px 10px; border-bottom: 1px solid #222; text-align: left; }
+        /* 무조건 밝게 투명화 (미보유/미발매) */
+        .is-dimmed { filter: opacity(0.4) brightness(1.7); }
+
+        .table-wrap { overflow-x: auto; background: var(--card); border-radius: 8px; border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #222; font-size: 13px; }
         th { background: #1a1a1a; color: var(--dim); font-weight: normal; font-size: 11px; }
-        .t-img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
-        .t-num { width: 40px; color: var(--accent); text-align: center; font-weight: bold; }
+        .t-img { width: 40px; height: 40px; object-fit: cover; border-radius: 3px; }
+        .t-no { color: var(--accent); font-weight: bold; width: 40px; text-align: center; }
 
         /* Form */
-        .form-card { background: var(--card); padding: 25px; border-radius: 12px; border: 1px solid var(--border); }
-        input, select, textarea { width: 100%; padding: 14px; background: #000; border: 1px solid var(--border); border-radius: 8px; color: #fff; margin-bottom: 15px; font-size: 14px; }
-        .price-box { display: grid; grid-template-columns: 80px 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .batch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin: 20px 0; padding: 15px; border: 1px dashed var(--border); border-radius: 10px; }
-        .thumb { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 5px; opacity: 0.5; border: 2px solid transparent; }
-        .thumb.active { opacity: 1; border-color: var(--accent); }
+        input, select, textarea { width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #333; border-radius: 6px; color: #fff; margin-bottom: 12px; }
+        .price-row { display: grid; grid-template-columns: 80px 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        .batch-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 8px; border: 1px dashed #444; padding: 10px; margin-bottom: 15px; }
+        .batch-thumb { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 4px; opacity: 0.5; border: 2px solid transparent; }
+        .batch-thumb.active { opacity: 1; border-color: var(--accent); }
 
         /* Detail (50:50) */
         #detail { position: fixed; inset: 0; background: #000; z-index: 2000; display: none; overflow-y: auto; }
-        .d-flex { display: flex; min-height: 100vh; }
-        .d-left { flex: 5; background: #080808; display: flex; align-items: center; justify-content: center; padding: 40px; position: sticky; top: 0; height: 100vh; }
-        .d-left img { max-width: 90%; max-height: 90%; object-fit: contain; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
-        .d-right { flex: 5; padding: 60px; display: flex; flex-direction: column; justify-content: center; }
-        @media (max-width: 900px) { 
-            .d-flex { flex-direction: column; } 
-            .d-left { height: 50vh; position: relative; padding: 20px; } 
-            .d-right { padding: 40px 20px; } 
+        .d-container { display: flex; min-height: 100vh; }
+        .d-img-box { flex: 5; background: #050505; display: flex; align-items: center; justify-content: center; padding: 20px; position: sticky; top: 0; height: 100vh; }
+        .d-img-box img { max-width: 100%; max-height: 90%; object-fit: contain; }
+        .d-info-box { flex: 5; padding: 50px; display: flex; flex-direction: column; justify-content: center; }
+        @media (max-width: 800px) {
+            .d-container { flex-direction: column; }
+            .d-img-box { height: 50vh; position: relative; }
+            .d-info-box { padding: 30px 20px; }
         }
 
-        /* Overlay & Loader */
-        #loader { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .spin { width: 35px; height: 35px; border: 3px solid #222; border-top: 3px solid var(--accent); border-radius: 50%; animation: s 0.8s linear infinite; }
-        @keyframes s { to { transform: rotate(360deg); } }
-        #batch-bar { position: fixed; bottom: 0; width: 100%; height: 80px; background: var(--accent); color: #000; display: none; align-items: center; justify-content: space-between; padding: 0 25px; font-weight: bold; z-index: 1500; }
+        /* Utils */
+        #loader { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .spinner { width: 30px; height: 30px; border: 3px solid #333; border-top: 3px solid var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #batch-bar { position: fixed; bottom: 0; width: 100%; height: 70px; background: var(--accent); color: #000; display: none; align-items: center; justify-content: space-between; padding: 0 20px; font-weight: bold; z-index: 1500; }
     </style>
 </head>
 <body>
 
-<div id="loader"><div class="spin"></div><p id="msg" style="margin-top:15px; font-size:13px; letter-spacing:1px; color:var(--accent);">SYNCING DATA...</p></div>
+<div id="loader"><div class="spinner"></div><p id="loadMsg" style="margin-top:10px; font-size:12px; color:var(--accent);">데이터 처리 중...</p></div>
 
-<div id="login" style="display:none; text-align:center; padding-top:40vh;">
-    <h1 style="letter-spacing:8px; font-size:16px; margin-bottom:30px;">VINYL ARCHIVE</h1>
-    <input type="password" id="pw" style="width:200px; text-align:center;" placeholder="PASSWORD" onkeyup="if(event.keyCode==13)auth()">
+<div id="loginView" style="display:none; text-align:center; padding-top:40vh;">
+    <h2 style="letter-spacing:10px; font-size:18px; margin-bottom:30px;">VINYL ARCHIVE</h2>
+    <input type="password" id="pw" style="width:200px; text-align:center;" placeholder="PASSWORD" onkeyup="if(event.keyCode==13)doLogin()">
 </div>
 
 <div id="app" style="display:none;">
     <nav>
         <div style="display:flex; align-items:center;">
-            <button class="back-btn" onclick="go('list')" id="back" style="display:none;">←</button>
-            <button onclick="go('list')" id="n-l" style="background:none; border:none; color:#fff; font-weight:bold; cursor:pointer;">LIST</button>
-            <button onclick="go('add')" id="n-a" style="background:none; border:none; color:#fff; font-weight:bold; cursor:pointer; margin-left:15px;">ADD</button>
+            <button class="back-btn" id="navBack" onclick="go('list')">←</button>
+            <span style="font-weight:900; letter-spacing:2px; font-size:14px; cursor:pointer;" onclick="go('list')">VINYL ARCHIVE</span>
         </div>
         <div style="display:flex; gap:15px; align-items:center;">
-            <span onclick="changeView('grid')" id="v-g" style="cursor:pointer; font-size:20px;">▦</span>
-            <span onclick="changeView('table')" id="v-t" style="cursor:pointer; font-size:20px; color:var(--dim);">≡</span>
-            <button onclick="editMode()" id="e-m" style="color:var(--accent); background:none; border:none; font-size:13px; font-weight:bold;">편집</button>
+            <span onclick="go('add')" style="cursor:pointer; font-size:14px; font-weight:bold;">ADD</span>
+            <span onclick="toggleView()" id="viewIcon" style="cursor:pointer; font-size:18px;">≡</span>
+            <span onclick="toggleEdit()" id="editBtn" style="cursor:pointer; font-size:13px; color:var(--accent);">편집</span>
         </div>
     </nav>
 
     <div class="toolbar" id="toolbar">
-        <div class="sort-scroll">
-            <button id="s-id" class="btn-s active" onclick="sortData('id')">등록순 ↓</button>
-            <button id="s-title" class="btn-s" onclick="sortData('title')">앨범명</button>
-            <button id="s-artist" class="btn-s" onclick="sortData('artist')">가수명</button>
-            <button id="s-release_date" class="btn-s" onclick="sortData('release_date')">발매일</button>
-            <button id="s-purchase_date" class="btn-s" onclick="sortData('purchase_date')">구매일</button>
-            <button id="s-list_price" class="btn-s" onclick="sortData('list_price')">가격순</button>
-            <button id="s-country" class="btn-s" onclick="sortData('country')">나라순</button>
-            <button onclick="fC()" class="btn-s" id="f-c">국가: 전체</button>
-            <button onclick="fS()" class="btn-s" id="f-s">상태: 전체</button>
+        <div class="sort-container">
+            <button id="s-id" class="sort-btn active" onclick="sortData('id')">등록순 ↓</button>
+            <button id="s-title" class="sort-btn" onclick="sortData('title')">앨범명</button>
+            <button id="s-artist" class="sort-btn" onclick="sortData('artist')">가수명</button>
+            <button id="s-release_date" class="sort-btn" onclick="sortData('release_date')">발매일</button>
+            <button id="s-purchase_date" class="sort-btn" onclick="sortData('purchase_date')">구매일</button>
+            <button id="s-price" class="sort-btn" onclick="sortData('price')">가격순</button>
+            <button id="s-country" class="sort-btn" onclick="sortData('country')">나라순</button>
+            <button onclick="filterCountry()" class="sort-btn" id="f-c">국가: 전체</button>
+            <button onclick="filterOwned()" class="sort-btn" id="f-o">상태: 전체</button>
         </div>
-        <div class="total-info" id="total">TOTAL 0</div>
+        <div class="total-label" id="totalCount">TOTAL 0</div>
     </div>
 
-    <main>
+    <main class="fade">
         <section id="list" class="active">
-            <div id="grid" class="lp-grid"></div>
-            <div id="table" style="display:none;">
+            <div id="grid-view" class="lp-grid"></div>
+            <div id="table-view" class="table-wrap" style="display:none;">
                 <table>
-                    <thead><tr><th class="t-num">No</th><th>사진</th><th>앨범명</th><th>가수명</th><th>발매일</th><th>구매일</th></tr></thead>
-                    <tbody id="t-body"></tbody>
+                    <thead><tr><th class="t-no">No</th><th>사진</th><th>앨범명</th><th>가수명</th><th>발매일</th><th>구매일</th></tr></thead>
+                    <tbody id="table-body"></tbody>
                 </table>
             </div>
         </section>
 
         <section id="add">
-            <div class="form-card">
-                <h2 id="f-title" style="margin-top:0; font-size:18px; letter-spacing:2px;">REGISTER</h2>
-                <input type="hidden" id="e-id">
-                <label style="display:flex; align-items:center; gap:10px; margin-bottom:20px; font-size:14px;">
-                    <input type="checkbox" id="own" checked style="width:auto; margin:0;"> 보유 중
-                </label>
-                <p style="font-size:11px; color:var(--dim); margin-bottom:8px;">사진 업로드 (일괄 가능)</p>
-                <input type="file" id="files" accept="image/*" multiple onchange="hFiles(this)">
-                <div id="b-area" class="batch-grid" style="display:none;"></div>
+            <h3 id="formTitle" style="margin-top:0;">ADD NEW VINYL</h3>
+            <input type="hidden" id="editId">
+            <label style="display:flex; align-items:center; gap:8px; margin-bottom:15px; font-size:14px;">
+                <input type="checkbox" id="isOwned" checked style="width:auto; margin:0;"> 현재 보유 중
+            </label>
+            
+            <p style="font-size:11px; color:var(--dim); margin-bottom:5px;">사진 업로드 (여러 장 선택 시 일괄 등록 준비)</p>
+            <input type="file" id="fileIn" accept="image/*" multiple onchange="handleFiles(this)">
+            <div id="batchArea" class="batch-preview" style="display:none;"></div>
 
-                <input type="text" id="t-in" placeholder="앨범명">
-                <input type="text" id="a-in" placeholder="가수명">
-                <select id="c-in">
-                    <option value="한국">한국</option><option value="일본">일본</option><option value="미국">미국</option><option value="유럽">유럽</option><option value="기타">기타</option>
-                </select>
-                
-                <div class="price-box">
-                    <select id="lc" style="margin:0;"><option value="₩">₩</option><option value="¥">¥</option><option value="$">$</option></select>
-                    <input type="number" id="lp" placeholder="정가" style="margin:0;">
-                    <input type="number" id="lx" placeholder="환율" value="1" style="margin:0;">
-                </div>
-                <div class="price-box">
-                    <select id="pc" style="margin:0;"><option value="₩">₩</option><option value="¥">¥</option><option value="$">$</option></select>
-                    <input type="number" id="pp" placeholder="구매가" style="margin:0;">
-                    <input type="number" id="px" placeholder="환율" value="1" style="margin:0;">
-                </div>
-
-                <div style="display:flex; gap:10px;">
-                    <div style="flex:1;"><label style="font-size:11px; color:var(--dim);">발매일</label><input type="date" id="rd-in"></div>
-                    <div style="flex:1;"><label style="font-size:11px; color:var(--dim);">구매일</label><input type="date" id="pd-in"></div>
-                </div>
-                <textarea id="m-in" rows="4" placeholder="메모..."></textarea>
-                <button onclick="save()" style="width:100%; padding:18px; background:var(--accent); color:#000; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">SAVE ARCHIVE</button>
+            <input type="text" id="in-title" placeholder="앨범명">
+            <input type="text" id="in-artist" placeholder="가수명">
+            <select id="in-country">
+                <option value="한국">한국</option><option value="일본">일본</option><option value="미국">미국</option><option value="유럽">유럽</option><option value="기타">기타</option>
+            </select>
+            
+            <div class="price-row">
+                <select id="l-curr" style="margin:0;"><option value="₩">₩</option><option value="¥">¥</option><option value="$">$</option></select>
+                <input type="number" id="in-lprice" placeholder="정가" style="margin:0;">
+                <input type="number" id="l-ex" placeholder="환율" value="1" style="margin:0;">
             </div>
+            <div class="price-row">
+                <select id="p-curr" style="margin:0;"><option value="₩">₩</option><option value="¥">¥</option><option value="$">$</option></select>
+                <input type="number" id="in-pprice" placeholder="구매가" style="margin:0;">
+                <input type="number" id="p-ex" placeholder="환율" value="1" style="margin:0;">
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <div style="flex:1;"><label style="font-size:11px; color:var(--dim);">발매일</label><input type="date" id="in-rd"></div>
+                <div style="flex:1;"><label style="font-size:11px; color:var(--dim);">구매일</label><input type="date" id="in-pd"></div>
+            </div>
+            <textarea id="in-memo" rows="4" placeholder="메모..."></textarea>
+            <button onclick="save()" style="width:100%; padding:15px; background:var(--accent); color:#000; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">SAVE ARCHIVE</button>
         </section>
     </main>
 </div>
 
 <div id="batch-bar">
-    <span id="b-cnt">0 SELECTED</span>
+    <span id="selCount">0 SELECTED</span>
     <div>
-        <button onclick="editMode()" style="background:none; border:1px solid #000; padding:8px 15px; border-radius:5px; margin-right:10px;">취소</button>
-        <button onclick="bDel()" style="background:#000; color:#fff; border:none; padding:8px 20px; border-radius:5px;">일괄 삭제</button>
+        <button onclick="toggleEdit()" style="background:none; border:1px solid #000; padding:8px 15px; border-radius:5px; margin-right:10px;">취소</button>
+        <button onclick="batchDelete()" style="background:#000; color:#fff; border:none; padding:8px 20px; border-radius:5px;">일괄 삭제</button>
     </div>
 </div>
 
-<div id="detail">
-    <button onclick="closeD()" style="position:fixed; top:20px; left:20px; z-index:3000; background:rgba(0,0,0,0.5); color:#fff; border:1px solid #444; width:40px; height:40px; border-radius:50%; font-size:20px;">←</button>
-    <div class="d-flex">
-        <div class="d-left"><img id="di" src=""></div>
-        <div class="d-right">
+<div id="detail" class="fade">
+    <button onclick="closeDetail()" style="position:fixed; top:20px; left:20px; z-index:3000; background:rgba(0,0,0,0.5); color:#fff; border:1px solid #444; width:40px; height:40px; border-radius:50%; font-size:20px;">←</button>
+    <div class="d-container">
+        <div class="d-img-box"><img id="d-img" src=""></div>
+        <div class="d-info-box">
             <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <span id="dc" style="background:var(--accent); color:#000; padding:4px 10px; border-radius:5px; font-size:11px; font-weight:bold;"></span>
-                <span id="ds" style="background:#222; padding:4px 10px; border-radius:5px; font-size:11px;"></span>
+                <span id="d-country" style="background:var(--accent); color:#000; padding:4px 10px; border-radius:5px; font-size:11px; font-weight:bold;"></span>
+                <span id="d-status" style="background:#222; padding:4px 10px; border-radius:5px; font-size:11px;"></span>
             </div>
-            <h1 id="dt" style="font-size:32px; margin:0;"></h1>
-            <h2 id="da" style="font-size:18px; color:var(--dim); margin:10px 0 40px; font-weight:normal;"></h2>
+            <h1 id="d-title" style="margin:0; font-size:30px;"></h1>
+            <h2 id="d-artist" style="margin:10px 0 30px; font-size:18px; color:var(--dim); font-weight:normal;"></h2>
             
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:25px; border-top:1px solid #222; padding-top:25px;">
-                <div><label style="color:var(--dim); font-size:11px;">발매일</label><p id="drd"></p></div>
-                <div><label style="color:var(--dim); font-size:11px;">구매일</label><p id="dpd"></p></div>
-                <div><label style="color:var(--dim); font-size:11px;">정가(출고가)</label><p id="dlp" style="color:var(--accent); font-weight:bold;"></p></div>
-                <div><label style="color:var(--dim); font-size:11px;">실구매가</label><p id="dpp" style="color:var(--accent); font-weight:bold;"></p></div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; border-top:1px solid #222; padding-top:25px;">
+                <div><label style="color:var(--dim); font-size:11px;">발매일</label><p id="d-rd" style="margin:5px 0;"></p></div>
+                <div><label style="color:var(--dim); font-size:11px;">구매일</label><p id="d-pd" style="margin:5px 0;"></p></div>
+                <div><label style="color:var(--dim); font-size:11px;">정가(출고가)</label><p id="d-lp" style="margin:5px 0; color:var(--accent); font-weight:bold;"></p></div>
+                <div><label style="color:var(--dim); font-size:11px;">실구매가</label><p id="d-pp" style="margin:5px 0; color:var(--accent); font-weight:bold;"></p></div>
             </div>
-            <div style="margin:30px 0; background:#111; padding:20px; border-radius:8px; border-left:3px solid var(--accent); white-space:pre-wrap; font-size:14px;" id="dm"></div>
+            <div style="margin:30px 0; background:#111; padding:15px; border-radius:6px; border-left:3px solid var(--accent); white-space:pre-wrap; font-size:14px; line-height:1.6;" id="d-memo"></div>
             <div style="display:flex; gap:10px; margin-top:auto;">
-                <button onclick="startEdit()" style="flex:1; padding:15px; background:#1a1a1a; color:#fff; border:1px solid #333; border-radius:8px;">수정</button>
-                <button id="del-btn" style="flex:1; padding:15px; background:none; color:var(--danger); border:1px solid var(--danger); border-radius:8px;">삭제</button>
+                <button onclick="startEdit()" style="flex:1; padding:15px; background:#1a1a1a; color:#fff; border:1px solid #333; border-radius:8px;">수정하기</button>
+                <button id="delBtn" style="flex:1; padding:15px; background:none; color:var(--danger); border:1px solid var(--danger); border-radius:8px;">삭제하기</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    const GURL = 'https://script.google.com/macros/s/AKfycbwjp9soR-s225GM7FGr_Dw9ld7-8tfxng2MhOYESQ1a9VwucZyX3svFd0zBE3NOQeqS/exec'; 
-    const PW = '142857';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwjp9soR-s225GM7FGr_Dw9ld7-8tfxng2MhOYESQ1a9VwucZyX3svFd0zBE3NOQeqS/exec';
+    const ACCESS_PW = '142857';
 
-    let db = [], selIds = [], isE = false;
-    let view = 'grid', curS = 'id', isAsc = false;
-    let f_c = 'All', f_s = 'All';
-    let tempImgs = [];
+    let items = [], selIds = [], isEdit = false;
+    let currentView = 'grid', sortKey = 'id', isAsc = false;
+    let filterC = 'All', filterO = 'All';
+    let tempImages = [];
 
     window.onload = () => {
-        if(localStorage.getItem('v_auth') === 'true') init();
-        else document.getElementById('login').style.display = 'block';
+        if(localStorage.getItem('vinyl_auth') === 'true') startApp();
+        else document.getElementById('loginView').style.display = 'block';
     };
 
-    function auth() {
-        if(document.getElementById('pw').value === PW) {
-            localStorage.setItem('v_auth', 'true');
-            init();
-        } else alert('비밀번호가 틀렸습니다.');
+    function doLogin() {
+        if(document.getElementById('pw').value === ACCESS_PW) {
+            localStorage.setItem('vinyl_auth', 'true');
+            startApp();
+        } else alert('틀렸습니다.');
     }
 
-    async function init() {
-        document.getElementById('login').style.display = 'none';
+    async function startApp() {
+        document.getElementById('loginView').style.display = 'none';
         document.getElementById('app').style.display = 'block';
-        await load();
+        await loadData();
     }
 
-    async function load() {
-        loader(true, 'FETCHING DATA...');
+    async function loadData() {
+        loader(true, '아카이브 동기화 중...');
         try {
-            const r = await fetch(GURL);
-            db = await r.json();
+            const res = await fetch(SCRIPT_URL);
+            items = await res.json();
             sortData('id');
         } catch(e) { console.error(e); }
         loader(false);
@@ -230,76 +234,70 @@
     function go(page) {
         document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
         document.getElementById(page).classList.add('active');
-        document.getElementById('back').style.display = (page === 'list') ? 'none' : 'block';
+        document.getElementById('navBack').style.display = (page === 'list') ? 'none' : 'block';
         document.getElementById('toolbar').style.display = (page === 'list') ? 'flex' : 'none';
-        if(page === 'list') render(); else if(page === 'add') resetF();
+        if(page === 'list') render(); else if(page === 'add') resetForm();
     }
 
-    // 일괄 파일 처리 및 압축
-    async function hFiles(input) {
+    // 사진 압축 및 처리
+    async function handleFiles(input) {
         if(!input.files.length) return;
-        loader(true, 'OPTIMIZING IMAGES...');
-        const area = document.getElementById('b-area');
+        loader(true, '이미지 최적화 중...');
+        const area = document.getElementById('batchArea');
         area.innerHTML = ""; area.style.display = "grid";
-        tempImgs = [];
+        tempImages = [];
 
-        for(let f of input.files) {
-            const b64 = await compress(f);
-            tempImgs.push(b64);
+        for(let file of input.files) {
+            const base64 = await processImage(file);
+            tempImages.push(base64);
             const img = document.createElement('img');
-            img.src = b64; img.className = 'thumb';
+            img.src = base64; img.className = 'batch-thumb';
             img.onclick = function() {
-                document.querySelectorAll('.thumb').forEach(t=>t.classList.remove('active'));
-                this.classList.add('active'); window.curImg = b64;
+                document.querySelectorAll('.batch-thumb').forEach(t=>t.classList.remove('active'));
+                this.classList.add('active'); window.activeTempImg = base64;
             };
             area.appendChild(img);
         }
-        if(tempImgs.length) { area.firstChild.classList.add('active'); window.curImg = tempImgs[0]; }
+        if(tempImages.length) { area.firstChild.classList.add('active'); window.activeTempImg = tempImages[0]; }
         loader(false);
     }
 
-    async function compress(file) {
-        return new Promise(res => {
-            const r = new FileReader();
-            r.onload = (e) => {
+    async function processImage(file) {
+        return new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
                 const img = new Image();
                 img.onload = () => {
-                    const cvs = document.createElement('canvas');
-                    const s = Math.min(img.width, img.height);
-                    cvs.width = 600; cvs.height = 600;
-                    const ctx = cvs.getContext('2d');
-                    ctx.drawImage(img, (img.width-s)/2, (img.height-s)/2, s, s, 0, 0, 600, 600);
-                    res(cvs.toDataURL('image/jpeg', 0.75));
+                    const canvas = document.createElement('canvas');
+                    const size = Math.min(img.width, img.height);
+                    canvas.width = 600; canvas.height = 600;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, (img.width-size)/2, (img.height-size)/2, size, size, 0, 0, 600, 600);
+                    resolve(canvas.toDataURL('image/jpeg', 0.8));
                 };
                 img.src = e.target.result;
             };
-            r.readAsDataURL(file);
+            reader.readAsDataURL(file);
         });
     }
 
-    // 정렬 로직 (한/일/영 순서 및 토글 반영)
+    // 정렬 알고리즘 (한/일/영 대응 및 토글)
     function sortData(key) {
-        if(curS === key) isAsc = !isAsc;
-        else { curS = key; isAsc = (key === 'id' ? false : true); }
+        if(sortKey === key) isAsc = !isAsc;
+        else { sortKey = key; isAsc = (key === 'id' ? false : true); }
 
         const jaCol = new Intl.Collator('ja', { sensitivity: 'base', numeric: true });
-        const koCol = new Intl.Collator('ko', { numeric: true });
 
-        db.sort((a, b) => {
+        items.sort((a, b) => {
             let vA = a[key], vB = b[key];
             
-            // 가격 정렬 (원화 환산 기준)
-            if(key === 'list_price') {
+            if(key === 'price') {
                 vA = Number(a.list_price||0) * (a.l_curr === '₩' ? 1 : Number(a.l_ex||1));
                 vB = Number(b.list_price||0) * (b.l_curr === '₩' ? 1 : Number(b.l_ex||1));
-            }
-            // 나라 정렬 (한국>일본>기타)
-            else if(key === 'country') {
-                const p = {"한국":1, "일본":2};
-                vA = p[vA]||3; vB = p[vB]||3;
-            }
-            // 앨범명/가수명 (한글 > 일본어 > 영어)
-            else if(['title', 'artist'].includes(key)) {
+            } else if(key === 'country') {
+                const order = {"한국":1, "일본":2};
+                vA = order[vA]||3; vB = order[vB]||3;
+            } else if(['title', 'artist'].includes(key)) {
                 const getP = (s) => {
                     if(!s) return 4;
                     if(/[ㄱ-ㅎ가-힣]/.test(s[0])) return 1;
@@ -317,34 +315,34 @@
             return 0;
         });
 
-        document.querySelectorAll('.btn-s').forEach(b => b.classList.remove('active'));
-        const target = document.getElementById('s-'+key);
-        if(target) {
-            target.classList.add('active');
-            target.innerText = target.innerText.split(' ')[0] + (isAsc ? ' ↑' : ' ↓');
+        document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+        const btn = document.getElementById('s-'+key);
+        if(btn) {
+            btn.classList.add('active');
+            btn.innerText = btn.innerText.split(' ')[0] + (isAsc ? ' ↑' : ' ↓');
         }
         render();
     }
 
     function render() {
-        const now = new Date(); now.setHours(0,0,0,0);
-        let filtered = db.filter(i => (f_c === 'All' || i.country === f_c));
-        if(f_s !== 'All') filtered = filtered.filter(i => String(i.owned) === (f_s === '보유' ? 'true' : 'false'));
+        const today = new Date(); today.setHours(0,0,0,0);
+        let f = items.filter(i => (filterC === 'All' || i.country === filterC));
+        if(filterO !== 'All') f = f.filter(i => String(i.owned) === (filterO === '보유' ? 'true' : 'false'));
         
-        document.getElementById('total').innerText = `TOTAL ${filtered.length}`;
+        document.getElementById('totalCount').innerText = `TOTAL ${f.length}`;
 
-        if(view === 'grid') {
-            document.getElementById('grid').innerHTML = filtered.map(i => {
-                const isFut = i.release_date && new Date(i.release_date) > now;
-                const dim = (String(i.owned) === 'false' || isFut) ? 'is-dimmed' : '';
+        if(currentView === 'grid') {
+            document.getElementById('grid-view').innerHTML = f.map(i => {
+                const isFuture = i.release_date && new Date(i.release_date) > today;
+                const dim = (String(i.owned) === 'false' || isFuture) ? 'is-dimmed' : '';
                 const sel = selIds.includes(String(i.id)) ? 'selected' : '';
                 return `<div class="lp-item ${dim} ${sel}" onclick="clickItem('${i.id}')"><img src="${i.image}" loading="lazy"></div>`;
             }).join('');
         } else {
-            document.getElementById('t-body').innerHTML = filtered.map((i, idx) => {
+            document.getElementById('table-body').innerHTML = f.map((i, idx) => {
                 const sel = selIds.includes(String(i.id)) ? 'selected' : '';
                 return `<tr class="${sel}" onclick="clickItem('${i.id}')">
-                    <td class="t-num">${idx + 1}</td>
+                    <td class="t-no">${idx + 1}</td>
                     <td><img src="${i.image}" class="t-img"></td>
                     <td style="font-weight:bold;">${i.title || '-'}</td>
                     <td>${i.artist || '-'}</td>
@@ -356,161 +354,162 @@
     }
 
     function clickItem(id) {
-        if(isE) {
+        if(isEdit) {
             if(selIds.includes(id)) selIds = selIds.filter(x => x !== id);
             else selIds.push(id);
-            document.getElementById('b-cnt').innerText = `${selIds.length} SELECTED`;
+            document.getElementById('selCount').innerText = `${selIds.length} SELECTED`;
             render();
-        } else openD(id);
+        } else openDetail(id);
     }
 
-    function openD(id) {
-        const i = db.find(x => x.id == id);
+    function openDetail(id) {
+        const i = items.find(x => x.id == id);
         if(!i) return;
-        document.getElementById('di').src = i.image;
-        document.getElementById('dt').innerText = i.title || "Untitled";
-        document.getElementById('da').innerText = i.artist || "Unknown";
-        document.getElementById('dc').innerText = i.country || "기타";
-        document.getElementById('ds').innerText = String(i.owned)==='true' ? "보유 중" : "미보유";
-        document.getElementById('drd').innerText = (i.release_date||"").slice(0,10) || "-";
-        document.getElementById('dpd').innerText = (i.purchase_date||"").slice(0,10) || "-";
-        document.getElementById('dm').innerText = i.memo || "";
+        document.getElementById('d-img').src = i.image;
+        document.getElementById('d-title').innerText = i.title || "Unknown Title";
+        document.getElementById('d-artist').innerText = i.artist || "Unknown Artist";
+        document.getElementById('d-country').innerText = i.country || "기타";
+        document.getElementById('d-status').innerText = String(i.owned) === 'true' ? "보유 중" : "미보유";
+        document.getElementById('d-rd').innerText = (i.release_date||"").slice(0,10) || "-";
+        document.getElementById('d-pd').innerText = (i.purchase_date||"").slice(0,10) || "-";
+        document.getElementById('d-memo').innerText = i.memo || "";
         
-        const fmt = (v, c, e) => {
-            if(!v) return "0";
+        const priceFmt = (v, c, e) => {
+            if(!v) return "미기입";
             const cur = Number(v).toLocaleString();
             if(c === '₩') return `₩ ${cur}`;
-            return `${c}${cur} (약 ₩ ${Math.round(v * (e||1)).toLocaleString()})`;
+            const krw = Math.round(v * (e||1)).toLocaleString();
+            return `${c}${cur} (약 ₩ ${krw})`;
         };
-        document.getElementById('dlp').innerText = fmt(i.list_price, i.l_curr, i.l_ex);
-        document.getElementById('dpp').innerText = fmt(i.purchase_price, i.p_curr, i.p_ex);
+        document.getElementById('d-lp').innerText = priceFmt(i.list_price, i.l_curr, i.l_ex);
+        document.getElementById('d-pp').innerText = priceFmt(i.purchase_price, i.p_curr, i.p_ex);
 
         document.getElementById('detail').style.display = 'block';
-        document.getElementById('del-btn').onclick = () => del(i.id);
+        document.getElementById('delBtn').onclick = () => deleteOne(i.id);
         window.activeId = id;
     }
 
     async function save() {
-        const eid = document.getElementById('e-id').value;
-        let img = eid ? db.find(x => x.id == eid).image : window.curImg;
-        if(!img) return alert('사진을 등록하세요.');
+        const eid = document.getElementById('editId').value;
+        let img = eid ? items.find(x => x.id == eid).image : window.activeTempImg;
+        if(!img) return alert('사진을 업로드하세요.');
 
-        loader(true, 'SAVING...');
+        loader(true, '저장 중...');
         const data = {
             action: eid ? 'edit' : 'add',
             id: eid || Date.now(),
-            owned: document.getElementById('own').checked,
-            title: document.getElementById('t-in').value,
-            artist: document.getElementById('a-in').value,
-            country: document.getElementById('c-in').value,
-            l_curr: document.getElementById('lc').value,
-            l_ex: document.getElementById('lx').value || 1,
-            p_curr: document.getElementById('pc').value,
-            p_ex: document.getElementById('px').value || 1,
-            list_price: document.getElementById('lp').value,
-            purchase_price: document.getElementById('pp').value,
-            release_date: document.getElementById('rd-in').value,
-            purchase_date: document.getElementById('pd-in').value,
-            memo: document.getElementById('m-in').value,
+            owned: document.getElementById('isOwned').checked,
+            title: document.getElementById('in-title').value,
+            artist: document.getElementById('in-artist').value,
+            country: document.getElementById('in-country').value,
+            l_curr: document.getElementById('l-curr').value,
+            l_ex: document.getElementById('l-ex').value || 1,
+            p_curr: document.getElementById('p-curr').value,
+            p_ex: document.getElementById('p-ex').value || 1,
+            list_price: document.getElementById('in-lprice').value,
+            purchase_price: document.getElementById('in-pprice').value,
+            release_date: document.getElementById('in-rd').value,
+            purchase_date: document.getElementById('in-pd').value,
+            memo: document.getElementById('in-memo').value,
             image: img
         };
 
-        await fetch(GURL, { method: 'POST', body: JSON.stringify(data) });
+        await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(data) });
         
-        if(!eid && tempImgs.length > 1) {
-            tempImgs = tempImgs.filter(x => x !== window.curImg);
-            const area = document.getElementById('b-area');
+        if(!eid && tempImages.length > 1) {
+            tempImages = tempImages.filter(x => x !== window.activeTempImg);
+            const area = document.getElementById('batchArea');
             area.innerHTML = "";
-            tempImgs.forEach(s => {
+            tempImages.forEach(s => {
                 const img = document.createElement('img');
-                img.src = s; img.className = 'thumb';
+                img.src = s; img.className = 'batch-thumb';
                 img.onclick = function() { 
-                    document.querySelectorAll('.thumb').forEach(t=>t.classList.remove('active'));
-                    this.classList.add('active'); window.curImg = s;
+                    document.querySelectorAll('.batch-thumb').forEach(t=>t.classList.remove('active'));
+                    this.classList.add('active'); window.activeTempImg = s;
                 };
                 area.appendChild(img);
             });
-            area.firstChild.classList.add('active'); window.curImg = tempImgs[0];
-            resetFOnly(); loader(false); alert('저장됨. 다음 사진을 등록하세요.');
-        } else location.reload();
+            area.firstChild.classList.add('active'); window.activeTempImg = tempImages[0];
+            resetPartial(); loader(false); alert('저장되었습니다. 다음 항목을 입력하세요.');
+        } else {
+            location.reload();
+        }
     }
 
-    // 기본 보조 함수들
-    function changeView(v) {
-        view = v;
-        document.getElementById('v-g').style.color = v === 'grid' ? 'var(--accent)' : 'var(--dim)';
-        document.getElementById('v-t').style.color = v === 'table' ? 'var(--accent)' : 'var(--dim)';
-        document.getElementById('grid').style.display = v === 'grid' ? 'grid' : 'none';
-        document.getElementById('table').style.display = v === 'table' ? 'block' : 'none';
+    function toggleView() {
+        currentView = (currentView === 'grid') ? 'table' : 'grid';
+        document.getElementById('viewIcon').innerText = (currentView === 'grid') ? '≡' : '▦';
+        document.getElementById('grid-view').style.display = (currentView === 'grid') ? 'grid' : 'none';
+        document.getElementById('table-view').style.display = (currentView === 'table') ? 'block' : 'none';
         render();
     }
-    function editMode() {
-        isE = !isE; selIds = [];
-        document.getElementById('e-m').innerText = isE ? "취소" : "편집";
-        document.getElementById('batch-bar').style.display = isE ? "flex" : "none";
+    function toggleEdit() {
+        isEdit = !isEdit; selIds = [];
+        document.getElementById('editBtn').innerText = isEdit ? "취소" : "편집";
+        document.getElementById('batch-bar').style.display = isEdit ? "flex" : "none";
         render();
     }
-    async function bDel() {
-        if(!selIds.length || !confirm('선택 항목을 삭제할까요?')) return;
-        loader(true, 'DELETING...');
-        for(let id of selIds) await fetch(GURL, { method:'POST', body:JSON.stringify({action:'delete', id}) });
+    async function batchDelete() {
+        if(!selIds.length || !confirm('선택 항목을 영구 삭제할까요?')) return;
+        loader(true, '일괄 삭제 중...');
+        for(let id of selIds) await fetch(SCRIPT_URL, { method:'POST', body:JSON.stringify({action:'delete', id}) });
         location.reload();
     }
-    async function del(id) {
+    async function deleteOne(id) {
         if(!confirm('삭제할까요?')) return;
-        loader(true, 'DELETING...');
-        await fetch(GURL, { method:'POST', body:JSON.stringify({action:'delete', id}) });
+        loader(true, '삭제 중...');
+        await fetch(SCRIPT_URL, { method:'POST', body:JSON.stringify({action:'delete', id}) });
         location.reload();
     }
     function startEdit() {
-        const i = db.find(x => x.id == window.activeId);
-        closeD(); go('add');
-        document.getElementById('e-id').value = i.id;
-        document.getElementById('own').checked = String(i.owned) === 'true';
-        document.getElementById('t-in').value = i.title || "";
-        document.getElementById('a-in').value = i.artist || "";
-        document.getElementById('c-in').value = i.country || "한국";
-        document.getElementById('lc').value = i.l_curr || "₩";
-        document.getElementById('lx').value = i.l_ex || 1;
-        document.getElementById('lp').value = i.list_price || "";
-        document.getElementById('pc').value = i.p_curr || "₩";
-        document.getElementById('px').value = i.p_ex || 1;
-        document.getElementById('pp').value = i.purchase_price || "";
-        document.getElementById('rd-in').value = (i.release_date||"").slice(0,10);
-        document.getElementById('pd-in').value = (i.purchase_date||"").slice(0,10);
-        document.getElementById('m-in').value = i.memo || "";
-        document.getElementById('f-title').innerText = "EDIT ARCHIVE";
-        document.getElementById('b-area').style.display = "none";
+        const i = items.find(x => x.id == window.activeId);
+        closeDetail(); go('add');
+        document.getElementById('editId').value = i.id;
+        document.getElementById('isOwned').checked = String(i.owned) === 'true';
+        document.getElementById('in-title').value = i.title || "";
+        document.getElementById('in-artist').value = i.artist || "";
+        document.getElementById('in-country').value = i.country || "한국";
+        document.getElementById('l-curr').value = i.l_curr || "₩";
+        document.getElementById('l-ex').value = i.l_ex || 1;
+        document.getElementById('in-lprice').value = i.list_price || "";
+        document.getElementById('p-curr').value = i.p_curr || "₩";
+        document.getElementById('p-ex').value = i.p_ex || 1;
+        document.getElementById('in-pprice').value = i.purchase_price || "";
+        document.getElementById('in-rd').value = (i.release_date||"").slice(0,10);
+        document.getElementById('in-pd').value = (i.purchase_date||"").slice(0,10);
+        document.getElementById('in-memo').value = i.memo || "";
+        document.getElementById('formTitle').innerText = "EDIT ARCHIVE";
+        document.getElementById('batchArea').style.display = "none";
     }
-    function resetF() {
-        resetFOnly();
-        document.getElementById('e-id').value = "";
-        document.getElementById('files').value = "";
-        document.getElementById('b-area').innerHTML = "";
-        document.getElementById('b-area').style.display = "none";
-        document.getElementById('f-title').innerText = "REGISTER";
+    function resetForm() {
+        resetPartial();
+        document.getElementById('editId').value = "";
+        document.getElementById('fileIn').value = "";
+        document.getElementById('batchArea').innerHTML = "";
+        document.getElementById('batchArea').style.display = "none";
+        document.getElementById('formTitle').innerText = "ADD NEW VINYL";
     }
-    function resetFOnly() {
-        document.getElementById('t-in').value = ""; document.getElementById('a-in').value = "";
-        document.getElementById('lp').value = ""; document.getElementById('pp').value = "";
-        document.getElementById('rd-in').value = ""; document.getElementById('pd-in').value = "";
-        document.getElementById('m-in').value = "";
+    function resetPartial() {
+        document.getElementById('in-title').value = ""; document.getElementById('in-artist').value = "";
+        document.getElementById('in-lprice').value = ""; document.getElementById('in-pprice').value = "";
+        document.getElementById('in-rd').value = ""; document.getElementById('in-pd').value = "";
+        document.getElementById('in-memo').value = "";
     }
-    function fC() {
+    function filterCountry() {
         const c = ['All', '한국', '일본', '미국', '유럽', '기타'];
-        f_c = c[(c.indexOf(f_c) + 1) % c.length];
-        document.getElementById('f-c').innerText = `국가: ${f_c==='All'?'전체':f_c}`;
+        filterC = c[(c.indexOf(filterC) + 1) % c.length];
+        document.getElementById('f-c').innerText = `국가: ${filterC==='All'?'전체':filterC}`;
         render();
     }
-    function fS() {
+    function filterOwned() {
         const s = ['All', '보유', '미보유'];
-        f_s = s[(s.indexOf(f_s) + 1) % s.length];
-        document.getElementById('f-s').innerText = `상태: ${f_s==='All'?'전체':f_s}`;
+        filterO = s[(s.indexOf(filterO) + 1) % s.length];
+        document.getElementById('f-o').innerText = `상태: ${filterO==='All'?'전체':filterO}`;
         render();
     }
-    function closeD() { document.getElementById('detail').style.display = 'none'; }
+    function closeDetail() { document.getElementById('detail').style.display = 'none'; }
     function loader(show, m) { 
-        document.getElementById('msg').innerText = m || "";
+        document.getElementById('loadMsg').innerText = m || "";
         document.getElementById('loader').style.display = show ? 'flex' : 'none'; 
     }
 </script>
