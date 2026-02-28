@@ -24,31 +24,37 @@
         section { display: none; }
         section.active { display: block; }
 
+        /* Grid View */
         .lp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
         @media (max-width: 600px) { .lp-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; } }
-        
         .lp-item { position: relative; aspect-ratio: 1/1; background: #000; border-radius: 8px; overflow: hidden; cursor: pointer; transition: 0.2s; border: 3px solid transparent; }
         .lp-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
         
-        /* ✅ 미보유/미발매: 아주 밝게 투명화 */
+        /* Table View */
+        .table-container { overflow-x: auto; background: var(--card); border-radius: 10px; border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #222; }
+        th { background: #222; color: var(--dim); font-weight: normal; font-size: 11px; }
+        .table-row { cursor: pointer; transition: 0.2s; }
+        .table-row:hover { background: #252525; }
+        .table-row.selected { background: rgba(187,134,252,0.15); }
+
+        /* Effects */
         .is-dimmed { opacity: 0.45 !important; filter: brightness(1.7) contrast(0.8); }
-        
-        /* ✅ 편집 모드 선택 시각화 */
         .lp-item.selected { border-color: var(--accent) !important; transform: scale(0.92); z-index: 10; box-shadow: 0 0 15px rgba(187,134,252,0.5); }
         .edit-active .lp-item:not(.selected) { opacity: 0.4; filter: grayscale(0.5); }
         .edit-active .lp-item.selected { opacity: 1 !important; filter: none !important; }
 
-        /* ✅ 체크 표시 배지 수정 */
         .select-badge { 
             position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; 
             background: var(--accent); color: #000; border-radius: 50%; 
             display: none; align-items: center; justify-content: center; 
             font-size: 18px; font-weight: bold; z-index: 100;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.6);
-            pointer-events: none; /* 클릭 방해 금지 */
+            box-shadow: 0 2px 6px rgba(0,0,0,0.6); pointer-events: none;
         }
         .lp-item.selected .select-badge { display: flex; }
 
+        /* Form & UI */
         input, select, textarea { width: 100%; padding: 14px; background: #151515; border: 1px solid #333; border-radius: 8px; color: #fff; margin-bottom: 10px; font-size: 14px; }
         label { font-size: 11px; color: #888; margin-bottom: 4px; display: block; }
         .price-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #111; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #222; }
@@ -86,6 +92,7 @@
             <button onclick="go('add')" id="nav-add">추가</button>
         </div>
         <div class="nav-right">
+            <button id="viewToggle" onclick="toggleView()" style="color:#888;">표로 보기</button>
             <button id="editModeBtn" onclick="toggleEditMode()" style="color:var(--accent);">편집</button>
             <button onclick="logout()" style="font-size:11px; opacity:0.5;">로그아웃</button>
         </div>
@@ -105,14 +112,30 @@
     </div>
 
     <main>
-        <section id="list" class="active"><div id="grid-view" class="lp-grid"></div></section>
+        <section id="list" class="active">
+            <div id="grid-view" class="lp-grid"></div>
+            <div id="table-view" class="table-container" style="display:none;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:40px;">선택</th>
+                            <th>앨범정보</th>
+                            <th>국가</th>
+                            <th>출시가</th>
+                            <th>발매일</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+            </div>
+        </section>
         
         <section id="add">
-            <h2 id="formTitle" style="font-size:18px; margin:30px 0 15px;">정보 입력</h2>
+            <h2 id="formTitle" style="font-size:18px; margin:30px 0 15px;">바이닐 등록</h2>
             <input type="hidden" id="editId">
             <label style="display:flex; align-items:center; gap:10px; background:#1a1a1a; padding:15px; border-radius:8px; margin-bottom:15px; cursor:pointer; border: 1px solid #333;">
                 <input type="checkbox" id="owned" checked style="width:auto; margin:0;">
-                <span>보유 중 (해제 시 혹은 미발매 시 흐릿하게 표시)</span>
+                <span>현재 보유 중</span>
             </label>
             <input type="file" id="file" accept="image/*">
             <input type="text" id="t" placeholder="앨범 제목">
@@ -129,7 +152,7 @@
             </div>
             <div style="display:flex; gap:10px;"><div style="flex:1;"><label>발매일</label><input type="date" id="rd"></div><div style="flex:1;"><label>구매일</label><input type="date" id="pd"></div></div>
             <textarea id="m" rows="4" placeholder="메모..."></textarea>
-            <button onclick="save()" style="width:100%; padding:18px; background:var(--accent); color:#000; border:none; border-radius:10px; font-weight:bold;">바이닐 저장</button>
+            <button onclick="save()" style="width:100%; padding:18px; background:var(--accent); color:#000; border:none; border-radius:10px; font-weight:bold;">저장하기</button>
         </section>
     </main>
 </div>
@@ -169,18 +192,18 @@
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwjp9soR-s225GM7FGr_Dw9ld7-8tfxng2MhOYESQ1a9VwucZyX3svFd0zBE3NOQeqS/exec'; 
     const MY_PASSWORD = '142857';
 
-    let items = [], selectedIds = [], isEditMode = false;
+    let items = [], selectedIds = [], isEditMode = false, currentView = 'grid';
     let currentFilter = 'All', currentStatus = 'All', activeId = null;
     let currentSortKey = 'id', isAscending = false;
 
-    if(localStorage.getItem('vinyl_auth_final') === 'true') { window.addEventListener('load', startApp); } 
+    if(localStorage.getItem('vinyl_auth_v9') === 'true') { window.addEventListener('load', startApp); } 
     else { window.addEventListener('load', () => { document.getElementById('loginView').style.display = 'block'; }); }
 
     function doLogin() {
-        if(document.getElementById('pw').value === MY_PASSWORD) { localStorage.setItem('vinyl_auth_final', 'true'); startApp(); } 
+        if(document.getElementById('pw').value === MY_PASSWORD) { localStorage.setItem('vinyl_auth_v9', 'true'); startApp(); } 
         else alert('비밀번호가 틀렸습니다.');
     }
-    function logout() { localStorage.removeItem('vinyl_auth_final'); location.reload(); }
+    function logout() { localStorage.removeItem('vinyl_auth_v9'); location.reload(); }
 
     async function startApp() {
         document.getElementById('loginView').style.display = 'none';
@@ -194,21 +217,26 @@
         document.getElementById('loader').style.display = 'none';
     }
 
+    function toggleView() {
+        currentView = currentView === 'grid' ? 'table' : 'grid';
+        document.getElementById('viewToggle').innerText = currentView === 'grid' ? '표로 보기' : '이미지 보기';
+        document.getElementById('grid-view').style.display = currentView === 'grid' ? 'grid' : 'none';
+        document.getElementById('table-view').style.display = currentView === 'grid' ? 'none' : 'block';
+        render();
+    }
+
     function toggleEditMode() {
         isEditMode = !isEditMode;
         selectedIds = [];
         document.getElementById('editModeBtn').innerText = isEditMode ? "취소" : "편집";
         document.getElementById('batchBar').style.display = isEditMode ? "flex" : "none";
         document.getElementById('batchCount').innerText = "0개 선택됨";
-        
-        const grid = document.getElementById('grid-view');
-        if(isEditMode) grid.classList.add('edit-active');
-        else grid.classList.remove('edit-active');
-        
+        document.getElementById('grid-view').classList.toggle('edit-active', isEditMode);
         render();
     }
 
     function handleItemClick(id) {
+        id = String(id);
         if (isEditMode) {
             if (selectedIds.includes(id)) selectedIds = selectedIds.filter(x => x !== id);
             else selectedIds.push(id);
@@ -223,7 +251,6 @@
         if (selectedIds.length === 0) return;
         if (confirm(`${selectedIds.length}개를 삭제하시겠습니까?`)) {
             document.getElementById('loader').style.display = 'flex';
-            document.getElementById('loadMsg').innerText = "일괄 삭제 중...";
             for (let id of selectedIds) {
                 await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id }) });
             }
@@ -250,14 +277,11 @@
 
     function sortData(key) {
         if (currentSortKey === key) isAscending = !isAscending;
-        else { 
-            currentSortKey = key; 
-            isAscending = (key === 'artist' || key === 'title' || key.includes('date') || key.includes('price')); 
-        }
+        else { currentSortKey = key; isAscending = true; }
         items.sort((a, b) => {
             let vA = a[key], vB = b[key];
             if (key.includes('date')) { vA = vA ? new Date(vA) : new Date(0); vB = vB ? new Date(vB) : new Date(0); }
-            if (key.includes('price')) { vA = Number(vA || 0); vB = Number(vB || 0); }
+            if (key === 'list_price') { vA = Number(vA || 0); vB = Number(vB || 0); }
             if (vA < vB) return isAscending ? -1 : 1;
             if (vA > vB) return isAscending ? 1 : -1;
             return 0;
@@ -284,22 +308,28 @@
         let f = currentFilter === 'All' ? items : items.filter(i => i.country === currentFilter);
         if(currentStatus === '보유') f = f.filter(i => String(i.owned) === "true");
         if(currentStatus === '미보유') f = f.filter(i => String(i.owned) === "false");
-
         document.getElementById('totalLabel').innerText = f.length;
-        document.getElementById('grid-view').innerHTML = f.map(i => {
-            const isNotOwned = String(i.owned) === "false";
-            let isFuture = false;
-            if (i.release_date) { const rd = new Date(i.release_date); if (rd > today) isFuture = true; }
-            
-            const dimClass = (isNotOwned || isFuture) ? 'is-dimmed' : '';
-            const selectedClass = selectedIds.includes(String(i.id)) ? 'selected' : '';
-            
-            return `
-                <div class="lp-item ${dimClass} ${selectedClass}" onclick="handleItemClick('${i.id}')">
-                    <div class="select-badge">✓</div>
-                    <img src="${i.image}" loading="lazy">
-                </div>`;
-        }).join('');
+
+        if (currentView === 'grid') {
+            document.getElementById('grid-view').innerHTML = f.map(i => {
+                const dim = (String(i.owned) === "false" || (i.release_date && new Date(i.release_date) > today)) ? 'is-dimmed' : '';
+                const sel = selectedIds.includes(String(i.id)) ? 'selected' : '';
+                return `<div class="lp-item ${dim} ${sel}" onclick="handleItemClick('${i.id}')"><div class="select-badge">✓</div><img src="${i.image}" loading="lazy"></div>`;
+            }).join('');
+        } else {
+            document.getElementById('table-body').innerHTML = f.map(i => {
+                const sel = selectedIds.includes(String(i.id)) ? 'selected' : '';
+                const dim = (String(i.owned) === "false") ? 'opacity:0.5;' : '';
+                return `
+                    <tr class="table-row ${sel}" style="${dim}" onclick="handleItemClick('${i.id}')">
+                        <td><input type="checkbox" ${sel ? 'checked' : ''} style="width:auto;margin:0;"></td>
+                        <td><div style="font-weight:bold;">${i.title}</div><div style="font-size:11px;color:#888;">${i.artist}</div></td>
+                        <td style="font-size:11px;">${i.country}</td>
+                        <td style="color:var(--accent); font-weight:bold;">${i.l_curr || '₩'} ${Number(i.list_price || 0).toLocaleString()}</td>
+                        <td style="font-size:11px; color:#666;">${(i.release_date || "").substring(0,10)}</td>
+                    </tr>`;
+            }).join('');
+        }
     }
 
     function openD(id) {
@@ -309,16 +339,12 @@
         document.getElementById('da').innerText = i.artist;
         document.getElementById('dc').innerText = i.country;
         document.getElementById('ds').innerText = String(i.owned) === "true" ? "보유 중" : "미보유";
-        
         const lRate = i.l_curr === '₩' ? 1 : Number(i.l_ex || 1);
         const pRate = i.p_curr === '₩' ? 1 : Number(i.p_ex || 1);
-        
         document.getElementById('dlp').innerText = `${i.l_curr || '₩'} ${Number(i.list_price || 0).toLocaleString()}`;
         document.getElementById('dpp').innerText = `${i.p_curr || '₩'} ${Number(i.purchase_price || 0).toLocaleString()}`;
-        
         document.getElementById('dlp_krw').innerText = (i.l_curr && i.l_curr !== '₩') ? `(약 ₩ ${Math.round(i.list_price * lRate).toLocaleString()})` : "";
         document.getElementById('dpp_krw').innerText = (i.p_curr && i.p_curr !== '₩') ? `(약 ₩ ${Math.round(i.purchase_price * pRate).toLocaleString()})` : "";
-
         document.getElementById('drd').innerText = i.release_date ? i.release_date.substring(0,10) : "-";
         document.getElementById('dpd').innerText = i.purchase_date ? i.purchase_date.substring(0,10) : "-";
         document.getElementById('dm').innerText = i.memo || "";
@@ -334,17 +360,13 @@
         const fileInput = document.getElementById('file');
         let img = (editId && fileInput.files.length === 0) ? items.find(x => x.id == editId).image : "";
         if (fileInput.files.length > 0) img = await compressImage(fileInput.files[0]);
-
         const payload = {
             action: editId ? 'edit' : 'add', id: editId || Date.now(),
-            owned: document.getElementById('owned').checked,
-            title: document.getElementById('t').value, artist: document.getElementById('a').value,
-            country: document.getElementById('country').value,
-            l_curr: document.getElementById('l_curr').value, l_ex: document.getElementById('l_ex').value,
+            owned: document.getElementById('owned').checked, title: document.getElementById('t').value, artist: document.getElementById('a').value,
+            country: document.getElementById('country').value, l_curr: document.getElementById('l_curr').value, l_ex: document.getElementById('l_ex').value,
             p_curr: document.getElementById('p_curr').value, p_ex: document.getElementById('p_ex').value,
             list_price: document.getElementById('lp_raw').value, purchase_price: document.getElementById('pp_raw').value,
-            release_date: document.getElementById('rd').value, purchase_date: document.getElementById('pd').value,
-            memo: document.getElementById('m').value, image: img
+            release_date: document.getElementById('rd').value, purchase_date: document.getElementById('pd').value, memo: document.getElementById('m').value, image: img
         };
         await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
         location.reload();
@@ -366,7 +388,6 @@
         document.getElementById('rd').value = i.release_date ? i.release_date.substring(0,10) : "";
         document.getElementById('pd').value = i.purchase_date ? i.purchase_date.substring(0,10) : "";
         document.getElementById('m').value = i.memo || "";
-        document.getElementById('formTitle').innerText = "바이닐 수정하기";
     }
 
     async function deleteItem(id) { if(confirm('삭제하시겠습니까?')) { document.getElementById('loader').style.display = 'flex'; await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id }) }); location.reload(); } }
