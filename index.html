@@ -143,24 +143,40 @@
     async function load() {
     const loader = document.getElementById('loader');
     loader.style.display = 'flex';
+    
     try {
+        console.log("데이터 요청 시작:", WEB_APP_URL);
         const res = await fetch(WEB_APP_URL);
-        const data = await res.json();
         
-        // 데이터가 비어있어도 진행되도록 처리
+        if (!res.ok) throw new Error('네트워크 응답 에러');
+        
+        const data = await res.json();
+        console.log("받은 데이터:", data);
+
+        // 데이터가 배열인지 확인하고, 아니면 빈 배열로 초기화
         items = Array.isArray(data) ? data : [];
         
+        // 가격 숫자 추출 로직 보강
         items.forEach(i => {
-            const match = i.price ? i.price.match(/₩([\d,]+)/) : null;
-            i.price_val = match ? parseInt(match[1].replace(/,/g, '')) : 0;
+            if (i.price && typeof i.price === 'string') {
+                const match = i.price.match(/₩([\d,]+)/);
+                i.price_val = match ? parseInt(match[1].replace(/,/g, '')) : 0;
+            } else {
+                i.price_val = 0;
+            }
         });
         
         sortData('id'); 
+        
     } catch(e) { 
-        console.error(e);
-        alert('구글 시트 연결에 실패했습니다. URL과 권한 설정을 확인해주세요.'); 
+        console.error("상세 에러:", e);
+        alert('시트 연결 실패! 권한 설정이나 URL을 확인해주세요.\n에러내용: ' + e.message);
+        // 에러가 나도 '처리 중' 화면은 닫아줌
+        document.getElementById('list').classList.add('active'); 
     } finally {
         loader.style.display = 'none';
+        // 로그인 성공 후 앱 화면 강제 표시
+        document.getElementById('app').style.display = 'block';
     }
 }
     function sortData(key) {
@@ -243,5 +259,6 @@
 </script>
 </body>
 </html>
+
 
 
