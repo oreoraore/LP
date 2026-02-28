@@ -10,8 +10,13 @@
         body { margin: 0; background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.6; -webkit-tap-highlight-color: transparent; }
         
         nav { position: fixed; top: 0; width: 100%; height: 60px; background: var(--nav-bg); backdrop-filter: blur(15px); display: flex; justify-content: space-between; align-items: center; z-index: 1000; border-bottom: 1px solid var(--border); padding: 0 15px; }
+        .nav-right { display: flex; align-items: center; gap: 5px; }
         nav button { background: none; border: none; color: var(--text); font-weight: bold; cursor: pointer; font-size: 14px; padding: 10px; }
         nav button.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+
+        /* 뷰 전환 아이콘 버튼 */
+        .view-btn { font-size: 20px !important; color: var(--dim); padding: 5px 10px !important; }
+        .view-btn.active { color: var(--accent); }
 
         .sort-bar { position: fixed; top: 60px; width: 100%; background: var(--bg); padding: 10px; display: flex; align-items: center; gap: 6px; z-index: 900; border-bottom: 1px solid #222; }
         .sort-inner { display: flex; gap: 6px; overflow-x: auto; flex: 1; scrollbar-width: none; }
@@ -31,30 +36,29 @@
         .lp-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
         
         /* Table View */
-        .table-container { overflow-x: auto; background: var(--card); border-radius: 10px; border: 1px solid var(--border); }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #222; }
-        th { background: #222; color: var(--dim); font-weight: normal; font-size: 11px; }
+        .table-container { overflow-x: auto; background: var(--card); border-radius: 10px; border: 1px solid var(--border); margin-top: 5px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 500px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #222; vertical-align: middle; }
+        th { background: #222; color: var(--dim); font-weight: normal; font-size: 11px; white-space: nowrap; }
         .table-row { cursor: pointer; transition: 0.2s; }
-        .table-row:hover { background: #252525; }
-        .table-row.selected { background: rgba(187,134,252,0.15); }
+        .table-row.selected { background: rgba(187,134,252,0.2) !important; }
+        .t-img { width: 40px; height: 40px; border-radius: 4px; object-fit: cover; background: #000; }
 
         /* Effects */
-        .is-dimmed { opacity: 0.45 !important; filter: brightness(1.7) contrast(0.8); }
+        .is-dimmed { opacity: 0.4 !important; filter: brightness(1.5) contrast(0.8); }
         .lp-item.selected { border-color: var(--accent) !important; transform: scale(0.92); z-index: 10; box-shadow: 0 0 15px rgba(187,134,252,0.5); }
-        .edit-active .lp-item:not(.selected) { opacity: 0.4; filter: grayscale(0.5); }
-        .edit-active .lp-item.selected { opacity: 1 !important; filter: none !important; }
+        .edit-active .lp-item:not(.selected) { opacity: 0.3; filter: grayscale(0.6); }
 
         .select-badge { 
             position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; 
             background: var(--accent); color: #000; border-radius: 50%; 
             display: none; align-items: center; justify-content: center; 
             font-size: 18px; font-weight: bold; z-index: 100;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.6); pointer-events: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.6);
         }
         .lp-item.selected .select-badge { display: flex; }
 
-        /* Form & UI */
+        /* Forms */
         input, select, textarea { width: 100%; padding: 14px; background: #151515; border: 1px solid #333; border-radius: 8px; color: #fff; margin-bottom: 10px; font-size: 14px; }
         label { font-size: 11px; color: #888; margin-bottom: 4px; display: block; }
         .price-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #111; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #222; }
@@ -92,8 +96,9 @@
             <button onclick="go('add')" id="nav-add">추가</button>
         </div>
         <div class="nav-right">
-            <button id="viewToggle" onclick="toggleView()" style="color:#888;">표로 보기</button>
-            <button id="editModeBtn" onclick="toggleEditMode()" style="color:var(--accent);">편집</button>
+            <button id="btnGrid" onclick="changeView('grid')" class="view-btn active">▦</button>
+            <button id="btnTable" onclick="changeView('table')" class="view-btn">≡</button>
+            <button id="editModeBtn" onclick="toggleEditMode()" style="color:var(--accent); margin-left:10px;">편집</button>
             <button onclick="logout()" style="font-size:11px; opacity:0.5;">로그아웃</button>
         </div>
     </nav>
@@ -104,8 +109,7 @@
             <button class="sort-btn" onclick="sortData('artist')">가수순</button>
             <button class="sort-btn" onclick="sortData('title')">앨범순</button>
             <button class="sort-btn" onclick="sortData('list_price')">출시가순</button>
-            <button class="sort-btn" onclick="sortData('release_date')">출시일순</button>
-            <button id="filterBtn" class="sort-btn" onclick="filterCountry()">국가: 전체</button>
+            <button class="sort-btn" onclick="sortData('release_date')">발매일순</button> <button id="filterBtn" class="sort-btn" onclick="filterCountry()">국가: 전체</button>
             <button id="statusBtn" class="sort-btn" onclick="filterStatus()">상태: 전체</button>
         </div>
         <div id="totalLabel" class="total-count">0</div>
@@ -118,11 +122,11 @@
                 <table>
                     <thead>
                         <tr>
-                            <th style="width:40px;">선택</th>
-                            <th>앨범정보</th>
-                            <th>국가</th>
-                            <th>출시가</th>
+                            <th>사진</th>
+                            <th>앨범명</th>
+                            <th>가수명</th>
                             <th>발매일</th>
+                            <th>구매일</th>
                         </tr>
                     </thead>
                     <tbody id="table-body"></tbody>
@@ -131,7 +135,7 @@
         </section>
         
         <section id="add">
-            <h2 id="formTitle" style="font-size:18px; margin:30px 0 15px;">바이닐 등록</h2>
+            <h2 id="formTitle" style="font-size:18px; margin:30px 0 15px;">정보 입력</h2>
             <input type="hidden" id="editId">
             <label style="display:flex; align-items:center; gap:10px; background:#1a1a1a; padding:15px; border-radius:8px; margin-bottom:15px; cursor:pointer; border: 1px solid #333;">
                 <input type="checkbox" id="owned" checked style="width:auto; margin:0;">
@@ -152,7 +156,7 @@
             </div>
             <div style="display:flex; gap:10px;"><div style="flex:1;"><label>발매일</label><input type="date" id="rd"></div><div style="flex:1;"><label>구매일</label><input type="date" id="pd"></div></div>
             <textarea id="m" rows="4" placeholder="메모..."></textarea>
-            <button onclick="save()" style="width:100%; padding:18px; background:var(--accent); color:#000; border:none; border-radius:10px; font-weight:bold;">저장하기</button>
+            <button onclick="save()" style="width:100%; padding:18px; background:var(--accent); color:#000; border:none; border-radius:10px; font-weight:bold;">바이닐 저장</button>
         </section>
     </main>
 </div>
@@ -196,14 +200,14 @@
     let currentFilter = 'All', currentStatus = 'All', activeId = null;
     let currentSortKey = 'id', isAscending = false;
 
-    if(localStorage.getItem('vinyl_auth_v9') === 'true') { window.addEventListener('load', startApp); } 
+    if(localStorage.getItem('vinyl_auth_v10') === 'true') { window.addEventListener('load', startApp); } 
     else { window.addEventListener('load', () => { document.getElementById('loginView').style.display = 'block'; }); }
 
     function doLogin() {
-        if(document.getElementById('pw').value === MY_PASSWORD) { localStorage.setItem('vinyl_auth_v9', 'true'); startApp(); } 
+        if(document.getElementById('pw').value === MY_PASSWORD) { localStorage.setItem('vinyl_auth_v10', 'true'); startApp(); } 
         else alert('비밀번호가 틀렸습니다.');
     }
-    function logout() { localStorage.removeItem('vinyl_auth_v9'); location.reload(); }
+    function logout() { localStorage.removeItem('vinyl_auth_v10'); location.reload(); }
 
     async function startApp() {
         document.getElementById('loginView').style.display = 'none';
@@ -217,11 +221,13 @@
         document.getElementById('loader').style.display = 'none';
     }
 
-    function toggleView() {
-        currentView = currentView === 'grid' ? 'table' : 'grid';
-        document.getElementById('viewToggle').innerText = currentView === 'grid' ? '표로 보기' : '이미지 보기';
-        document.getElementById('grid-view').style.display = currentView === 'grid' ? 'grid' : 'none';
-        document.getElementById('table-view').style.display = currentView === 'grid' ? 'none' : 'block';
+    // 뷰 전환 아이콘 방식
+    function changeView(type) {
+        currentView = type;
+        document.getElementById('btnGrid').classList.toggle('active', type === 'grid');
+        document.getElementById('btnTable').classList.toggle('active', type === 'table');
+        document.getElementById('grid-view').style.display = type === 'grid' ? 'grid' : 'none';
+        document.getElementById('table-view').style.display = type === 'grid' ? 'none' : 'block';
         render();
     }
 
@@ -249,7 +255,7 @@
 
     async function batchDelete() {
         if (selectedIds.length === 0) return;
-        if (confirm(`${selectedIds.length}개를 삭제하시겠습니까?`)) {
+        if (confirm(`${selectedIds.length}개를 일괄 삭제하시겠습니까?`)) {
             document.getElementById('loader').style.display = 'flex';
             for (let id of selectedIds) {
                 await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id }) });
@@ -258,26 +264,9 @@
         }
     }
 
-    async function compressImage(file) {
-        return new Promise((resolve) => {
-            const reader = new FileReader(); reader.readAsDataURL(file);
-            reader.onload = (e) => {
-                const img = new Image(); img.src = e.target.result;
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    let w = img.width, h = img.height, max = 600;
-                    if (w > h) { if (w > max) { h *= max / w; w = max; } } else { if (h > max) { w *= max / h; h = max; } }
-                    canvas.width = w; canvas.height = h;
-                    const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
-                    resolve(canvas.toDataURL('image/jpeg', 0.75));
-                };
-            };
-        });
-    }
-
     function sortData(key) {
         if (currentSortKey === key) isAscending = !isAscending;
-        else { currentSortKey = key; isAscending = true; }
+        else { currentSortKey = key; isAscending = (key === 'artist' || key === 'title' || key.includes('date')); }
         items.sort((a, b) => {
             let vA = a[key], vB = b[key];
             if (key.includes('date')) { vA = vA ? new Date(vA) : new Date(0); vB = vB ? new Date(vB) : new Date(0); }
@@ -317,16 +306,17 @@
                 return `<div class="lp-item ${dim} ${sel}" onclick="handleItemClick('${i.id}')"><div class="select-badge">✓</div><img src="${i.image}" loading="lazy"></div>`;
             }).join('');
         } else {
+            // 표 모드: 사진, 앨범명, 가수명, 발매일, 구매일 순서
             document.getElementById('table-body').innerHTML = f.map(i => {
                 const sel = selectedIds.includes(String(i.id)) ? 'selected' : '';
-                const dim = (String(i.owned) === "false") ? 'opacity:0.5;' : '';
+                const dim = (String(i.owned) === "false") ? 'opacity:0.4;' : '';
                 return `
                     <tr class="table-row ${sel}" style="${dim}" onclick="handleItemClick('${i.id}')">
-                        <td><input type="checkbox" ${sel ? 'checked' : ''} style="width:auto;margin:0;"></td>
-                        <td><div style="font-weight:bold;">${i.title}</div><div style="font-size:11px;color:#888;">${i.artist}</div></td>
-                        <td style="font-size:11px;">${i.country}</td>
-                        <td style="color:var(--accent); font-weight:bold;">${i.l_curr || '₩'} ${Number(i.list_price || 0).toLocaleString()}</td>
-                        <td style="font-size:11px; color:#666;">${(i.release_date || "").substring(0,10)}</td>
+                        <td><img src="${i.image}" class="t-img"></td>
+                        <td style="font-weight:bold;">${i.title}</td>
+                        <td>${i.artist}</td>
+                        <td style="font-size:11px;">${(i.release_date || "").substring(0,10)}</td>
+                        <td style="font-size:11px;">${(i.purchase_date || "").substring(0,10)}</td>
                     </tr>`;
             }).join('');
         }
@@ -359,7 +349,24 @@
         document.getElementById('loader').style.display = 'flex';
         const fileInput = document.getElementById('file');
         let img = (editId && fileInput.files.length === 0) ? items.find(x => x.id == editId).image : "";
-        if (fileInput.files.length > 0) img = await compressImage(fileInput.files[0]);
+        if (fileInput.files.length > 0) {
+            const reader = new FileReader();
+            img = await new Promise(r => {
+                reader.onload = e => {
+                    const canvas = document.createElement('canvas');
+                    const image = new Image();
+                    image.src = e.target.result;
+                    image.onload = () => {
+                        let w = image.width, h = image.height;
+                        if(w>600){h*=600/w; w=600;}
+                        canvas.width=w; canvas.height=h;
+                        canvas.getContext('2d').drawImage(image,0,0,w,h);
+                        r(canvas.toDataURL('image/jpeg', 0.7));
+                    };
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            });
+        }
         const payload = {
             action: editId ? 'edit' : 'add', id: editId || Date.now(),
             owned: document.getElementById('owned').checked, title: document.getElementById('t').value, artist: document.getElementById('a').value,
@@ -388,6 +395,7 @@
         document.getElementById('rd').value = i.release_date ? i.release_date.substring(0,10) : "";
         document.getElementById('pd').value = i.purchase_date ? i.purchase_date.substring(0,10) : "";
         document.getElementById('m').value = i.memo || "";
+        document.getElementById('formTitle').innerText = "바이닐 수정";
     }
 
     async function deleteItem(id) { if(confirm('삭제하시겠습니까?')) { document.getElementById('loader').style.display = 'flex'; await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id }) }); location.reload(); } }
@@ -395,7 +403,7 @@
     function go(id) {
         document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('nav button:not(.view-btn)').forEach(b => b.classList.remove('active'));
         if(id === 'list') document.getElementById('nav-list').classList.add('active');
         if(id === 'add') document.getElementById('nav-add').classList.add('active');
     }
