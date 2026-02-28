@@ -3,64 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Vinyl Archive Pro</title>
+    <title>Vinyl Archive v3</title>
     <style>
-        :root { --bg: #000; --card: #121212; --text: #fff; --accent: #bb86fc; --dim: #aaa; --nav-bg: rgba(0,0,0,0.85); }
-        * { box-sizing: border-box; font-family: -apple-system, "Malgun Gothic", sans-serif; transition: background 0.2s; }
-        body { margin: 0; background: var(--bg); color: var(--text); font-size: 18px; }
+        :root { --bg: #0b0b0b; --card: #1a1a1a; --text: #eee; --accent: #bb86fc; --dim: #888; --nav-bg: rgba(0,0,0,0.9); }
+        * { box-sizing: border-box; font-family: -apple-system, "Malgun Gothic", sans-serif; }
+        body { margin: 0; background: var(--bg); color: var(--text); font-size: 18px; line-height: 1.6; }
         .fade-in { opacity: 0; animation: fadeIn 0.4s forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        nav { position: fixed; top: 0; width: 100%; height: 60px; background: var(--nav-bg); backdrop-filter: blur(12px); display: flex; justify-content: space-around; align-items: center; z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        nav button { background: none; border: none; color: var(--text); font-weight: bold; cursor: pointer; font-size: 16px; }
+        nav { position: fixed; top: 0; width: 100%; height: 60px; background: var(--nav-bg); backdrop-filter: blur(15px); display: flex; justify-content: space-around; align-items: center; z-index: 100; border-bottom: 1px solid #333; }
+        nav button { background: none; border: none; color: var(--text); font-weight: bold; cursor: pointer; font-size: 16px; padding: 10px; }
 
-        /* 정렬 및 필터바 */
-        .sort-bar { position: fixed; top: 60px; width: 100%; background: var(--bg); padding: 10px; display: flex; gap: 8px; overflow-x: auto; z-index: 90; border-bottom: 1px solid #222; }
-        .sort-btn { white-space: nowrap; padding: 6px 14px; border-radius: 20px; background: var(--card); border: 1px solid #333; color: var(--dim); font-size: 13px; cursor: pointer; }
-        .sort-btn.active { border-color: var(--accent); color: var(--accent); font-weight: bold; }
+        .sort-bar { position: fixed; top: 60px; width: 100%; background: var(--bg); padding: 12px; display: flex; gap: 8px; overflow-x: auto; z-index: 90; border-bottom: 1px solid #222; }
+        .sort-btn { white-space: nowrap; padding: 8px 16px; border-radius: 20px; background: var(--card); border: 1px solid #333; color: var(--dim); font-size: 13px; cursor: pointer; }
+        .sort-btn.active { border-color: var(--accent); color: var(--accent); font-weight: bold; background: rgba(187,134,252,0.1); }
 
-        main { padding: 130px 15px 40px; max-width: 900px; margin: 0 auto; }
+        main { padding: 140px 15px 40px; max-width: 900px; margin: 0 auto; }
         section { display: none; }
         section.active { display: block; }
 
-        .lp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .lp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
         @media (max-width: 600px) { .lp-grid { grid-template-columns: repeat(2, 1fr); } }
-        .lp-item { aspect-ratio: 1/1; background: var(--card); border-radius: 8px; overflow: hidden; cursor: pointer; position: relative; }
+        .lp-item { aspect-ratio: 1/1; background: #000; border-radius: 10px; overflow: hidden; cursor: pointer; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         .lp-item img { width: 100%; height: 100%; object-fit: cover; }
-        .flag-badge { position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+        .flag-badge { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.7); padding: 3px 8px; border-radius: 5px; font-size: 11px; color: var(--accent); border: 1px solid var(--accent); }
 
-        .f-group { margin-bottom: 15px; }
-        label { display: block; color: var(--dim); margin-bottom: 5px; font-size: 14px; }
-        input, textarea, select { width: 100%; padding: 14px; background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--text); font-size: 16px; }
-        .save-btn { width: 100%; padding: 16px; background: var(--accent); color: #000; border: none; border-radius: 10px; font-weight: bold; font-size: 18px; cursor: pointer; }
+        .f-group { margin-bottom: 20px; }
+        label { display: block; color: var(--dim); margin-bottom: 8px; font-size: 14px; }
+        input, textarea, select { width: 100%; padding: 15px; background: var(--card); border: 1px solid #333; border-radius: 10px; color: var(--text); font-size: 16px; }
+        .save-btn { width: 100%; padding: 18px; background: var(--accent); color: #000; border: none; border-radius: 12px; font-weight: bold; font-size: 18px; cursor: pointer; margin-top: 10px; }
 
         /* 상세보기 */
         #detail { position: fixed; inset: 0; background: var(--bg); z-index: 500; display: none; flex-direction: column; overflow-y: auto; }
         .d-container { display: flex; flex-direction: row; min-height: 100vh; }
-        .d-img-side { flex: 0 0 45%; max-width: 500px; position: sticky; top: 0; height: 100vh; background: #000; display: flex; align-items: center; }
-        .d-img-side img { width: 100%; object-fit: contain; }
-        .d-info-side { flex: 1; padding: 40px; position: relative; }
-        .dt-country { display: inline-block; padding: 4px 10px; background: var(--accent); color: #000; border-radius: 5px; font-size: 14px; font-weight: bold; margin-bottom: 15px; }
-        .dt-title { font-size: 32px; font-weight: 800; color: #fff; margin: 0; }
-        .dt-artist { font-size: 22px; color: var(--dim); margin: 5px 0 25px 0; }
-        .dt-memo { font-size: 18px; line-height: 1.7; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 25px; }
-        @media (max-width: 800px) { .d-container { flex-direction: column; } .d-img-side { height: auto; position: relative; max-width: 100%; } .d-info-side { padding: 25px; } }
+        .d-img-side { flex: 0 0 45%; max-width: 500px; background: #000; display: flex; align-items: center; justify-content: center; position: sticky; top: 0; height: 100vh; }
+        .d-img-side img { width: 100%; max-height: 100%; object-fit: contain; }
+        .d-info-side { flex: 1; padding: 50px; position: relative; }
+        .dt-country { display: inline-block; padding: 5px 12px; background: var(--accent); color: #000; border-radius: 6px; font-size: 14px; font-weight: bold; margin-bottom: 20px; }
+        .dt-title { font-size: 38px; font-weight: 900; color: #fff; margin: 0; line-height: 1.2; }
+        .dt-artist { font-size: 24px; color: var(--dim); margin: 10px 0 30px 0; }
+        .dt-memo { font-size: 19px; line-height: 1.8; background: #1a1a1a; padding: 25px; border-radius: 15px; margin-bottom: 30px; border: 1px solid #333; }
+        @media (max-width: 800px) { .d-container { flex-direction: column; } .d-img-side { height: auto; position: relative; max-width: 100%; } .d-info-side { padding: 30px; } }
         
-        .back-btn-fixed { position: fixed; bottom: 20px; left: 20px; padding: 12px 25px; border-radius: 30px; background: #333; color: #fff; border: none; cursor: pointer; z-index: 600; font-weight: bold; }
-        .delete-btn { background: #ff4444; color: #fff; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; margin-top: 40px; float: right; }
+        .back-btn-fixed { position: fixed; bottom: 30px; left: 30px; padding: 14px 30px; border-radius: 40px; background: #333; color: #fff; border: none; cursor: pointer; z-index: 600; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .delete-btn { background: #ff4444; color: #fff; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; margin-top: 50px; float: right; opacity: 0.7; }
 
         #loginView { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; align-items: center; justify-content: center; }
-        #loader { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 2000; color: #fff; }
+        #loader { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 2000; color: #fff; flex-direction: column; gap: 15px; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #333; border-top: 4px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-<div id="loader">처리 중...</div>
+<div id="loader"><div class="spinner"></div><span>데이터 동기화 중...</span></div>
 
 <div id="loginView">
     <div class="login-card fade-in">
-        <h2 style="color:#fff; margin-bottom:20px;">VINYL ARCHIVE</h2>
-        <input type="password" id="pw" style="padding:15px; border-radius:10px; text-align:center;" placeholder="Password" onkeyup="if(event.keyCode==13)doLogin()">
+        <h2 style="color:#fff; margin-bottom:30px; letter-spacing:5px;">ARCHIVE</h2>
+        <input type="password" id="pw" style="padding:18px; border-radius:12px; text-align:center; width:260px;" placeholder="Password" onkeyup="if(event.keyCode==13)doLogin()">
     </div>
 </div>
 
@@ -75,25 +76,23 @@
         <button class="sort-btn active" onclick="sortData('id')">최신순</button>
         <button class="sort-btn" onclick="sortData('artist')">가수순(한/일/영)</button>
         <button class="sort-btn" onclick="sortData('price_val')">가격순</button>
-        <button class="sort-btn" onclick="filterCountry()">국적 필터링</button>
+        <button id="filterBtn" class="sort-btn" onclick="filterCountry()">나라 필터링: All</button>
     </div>
 
     <main class="fade-in">
         <section id="list" class="active"><div class="lp-grid" id="grid"></div></section>
 
         <section id="add">
-            <h2 style="font-weight:800;">새 앨범 등록</h2>
+            <h2 style="font-weight:900; font-size:28px;">새 앨범 등록</h2>
             <div class="f-group"><label>앨범 자켓</label><input type="file" id="file" accept="image/*"></div>
             <div class="f-group"><input type="text" id="t" placeholder="앨범명"></div>
             <div class="f-group"><input type="text" id="a" placeholder="가수명"></div>
             <div class="f-group">
-                <label>국적</label>
+                <label>나라 (Country)</label>
                 <select id="country">
-                    <option value="한국">한국</option>
-                    <option value="일본">일본</option>
-                    <option value="미국">미국</option>
-                    <option value="영국">영국</option>
-                    <option value="기타">기타</option>
+                    <option value="한국">한국</option><option value="일본">일본</option>
+                    <option value="미국">미국</option><option value="영국">영국</option>
+                    <option value="독일">독일</option><option value="프랑스">프랑스</option><option value="기타">기타</option>
                 </select>
             </div>
             <div style="display:flex; gap:10px;" class="f-group">
@@ -109,13 +108,13 @@
                 <div><label>발매일</label><input type="date" id="rd"></div>
                 <div><label>구매일</label><input type="date" id="pd"></div>
             </div>
-            <div class="f-group"><textarea id="m" rows="4" placeholder="메모"></textarea></div>
-            <button class="save-btn" onclick="save()">저장하기</button>
+            <div class="f-group"><textarea id="m" rows="4" placeholder="메모 및 감상평"></textarea></div>
+            <button class="save-btn" onclick="save()">컬렉션에 저장</button>
         </section>
 
         <section id="set">
             <h3>환경 설정</h3>
-            <button class="save-btn" style="background:#444; color:#fff;" onclick="location.reload()">로그아웃</button>
+            <button class="save-btn" style="background:#333; color:#fff;" onclick="location.reload()">로그아웃 및 초기화</button>
         </section>
     </main>
 </div>
@@ -128,20 +127,22 @@
             <h1 id="dt" class="dt-title"></h1>
             <p id="da" class="dt-artist"></p>
             <div id="dm" class="dt-memo"></div>
-            <p id="dp" style="font-size:20px; font-weight:bold; margin:0;"></p>
-            <div style="margin-top:20px; font-size:16px; color:var(--dim);">
+            <p id="dp" style="font-size:22px; font-weight:bold; margin:0;"></p>
+            <div style="margin-top:20px; font-size:17px; color:var(--dim);">
                 <p id="drd" style="margin:5px 0;"></p>
                 <p id="dpd" style="margin:5px 0;"></p>
             </div>
-            <button class="delete-btn" id="delBtn">삭제</button>
+            <button class="delete-btn" id="delBtn">데이터 삭제</button>
         </div>
     </div>
     <button class="back-btn-fixed" onclick="closeD()">← BACK</button>
 </div>
 
 <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyE8m3_RhZi_djJheGilaaKq0PkdCr3uCoXTDRjd5dtbiPkY0tUjoMKNn2aUv4hQdy4/exec'; 
+    // ⚠️ 수정 필수: 배포한 URL과 설정한 비밀번호
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw0bKPDQG02OcirqsYHZblI1k9DesGkX8ZuZNDFKItDYi7f3aHzm2zQdS1Csu82YbCL/exec'; 
     const MY_PASSWORD = '142857';
+
     let items = [];
     let currentFilter = 'All';
 
@@ -150,31 +151,45 @@
             document.getElementById('loginView').style.display = 'none';
             document.getElementById('app').style.display = 'block';
             load();
-        } else { alert('비번 오류'); }
+        } else { alert('비밀번호가 다릅니다.'); }
     }
 
     async function load() {
-        document.getElementById('loader').style.display = 'flex';
-        const res = await fetch(WEB_APP_URL);
-        items = await res.json();
-        items.forEach(i => {
-            const match = i.price.match(/₩([\d,]+)/);
-            i.price_val = match ? parseInt(match[1].replace(/,/g, '')) : 0;
-            // 날짜 연월일 포맷팅
-            i.release_date = i.release_date ? i.release_date.split('T')[0] : '';
-            i.purchase_date = i.purchase_date ? i.purchase_date.split('T')[0] : '';
-        });
-        sortData('id');
-        document.getElementById('loader').style.display = 'none';
+        const loader = document.getElementById('loader');
+        loader.style.display = 'flex';
+        try {
+            const res = await fetch(WEB_APP_URL);
+            const data = await res.json();
+            items = Array.isArray(data) ? data : [];
+            
+            items.forEach(i => {
+                // 가격 숫자 추출
+                const match = String(i.price).match(/₩([\d,]+)/);
+                i.price_val = match ? parseInt(match[1].replace(/,/g, '')) : 0;
+                // 날짜 깔끔하게 (연-월-일)
+                if(i.release_date) i.release_date = String(i.release_date).split('T')[0];
+                if(i.purchase_date) i.purchase_date = String(i.purchase_date).split('T')[0];
+            });
+            sortData('id');
+        } catch(e) {
+            console.error(e);
+            alert("시트 데이터를 가져오지 못했습니다. URL과 배포 설정을 확인하세요.");
+            document.getElementById('app').style.display = 'block'; // 에러나도 일단 진입
+        } finally {
+            loader.style.display = 'none';
+        }
     }
 
-    // 가수명 정렬: 한글(가-힣) -> 일본어(Hiragana/Katakana) -> 영어(A-Z)
+    // 가수명 정렬 로직 (한글 -> 일본어 통합 -> 영어)
     function getSortPriority(str) {
         if (!str) return 999;
         const char = str.charCodeAt(0);
-        if (char >= 0xAC00 && char <= 0xD7A3) return 1; // 한글
-        if ((char >= 0x3040 && char <= 0x309F) || (char >= 0x30A0 && char <= 0x30FF)) return 2; // 일본어
-        if ((char >= 65 && char <= 90) || (char >= 97 && char <= 122)) return 3; // 영어
+        // 한글 (가-힣)
+        if (char >= 0xAC00 && char <= 0xD7A3) return 1;
+        // 일본어 통합 (히라가나 0x3040-309F, 가타카나 0x30A0-30FF)
+        if (char >= 0x3040 && char <= 0x30FF) return 2;
+        // 영어 (A-Z, a-z)
+        if ((char >= 65 && char <= 90) || (char >= 97 && char <= 122)) return 3;
         return 4;
     }
 
@@ -184,31 +199,39 @@
                 const pA = getSortPriority(a.artist);
                 const pB = getSortPriority(b.artist);
                 if (pA !== pB) return pA - pB;
-                return a.artist.localeCompare(b.artist);
+                return String(a.artist).localeCompare(String(b.artist));
             }
             if (key === 'id' || key === 'price_val' || key === 'release_date' || key === 'purchase_date') {
-                return (b[key] > a[key]) ? 1 : -1;
+                const valA = a[key] || 0;
+                const valB = b[key] || 0;
+                return (valB > valA) ? 1 : -1;
             }
-            return a[key].localeCompare(b[key]);
+            return String(a[key]).localeCompare(String(b[key]));
         });
         render();
     }
 
     function filterCountry() {
-        const countries = ['All', ...new Set(items.map(i => i.country))];
+        const countries = ['All', ...new Set(items.map(i => i.country).filter(c => c))];
         const nextIdx = (countries.indexOf(currentFilter) + 1) % countries.length;
         currentFilter = countries[nextIdx];
-        alert(`필터링: ${currentFilter}`);
+        document.getElementById('filterBtn').innerText = `나라 필터링: ${currentFilter}`;
         render();
     }
 
     function render() {
         const grid = document.getElementById('grid');
         const filtered = currentFilter === 'All' ? items : items.filter(i => i.country === currentFilter);
+        
+        if(filtered.length === 0) {
+            grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:50px; color:#555;">표시할 앨범이 없습니다.</p>';
+            return;
+        }
+
         grid.innerHTML = filtered.map(i => `
             <div class="lp-item fade-in" onclick="openD('${i.id}')">
-                <img src="${i.image}">
-                <div class="flag-badge">${i.country}</div>
+                <img src="${i.image}" loading="lazy">
+                <div class="flag-badge">${i.country || '기타'}</div>
             </div>
         `).join('');
     }
@@ -219,7 +242,9 @@
 
     function save() {
         const f = document.getElementById('file').files[0];
-        if(!f) return alert('사진 필수');
+        const title = document.getElementById('t').value;
+        if(!f || !title) return alert('사진과 앨범명은 필수입니다.');
+
         document.getElementById('loader').style.display = 'flex';
 
         const cur = document.getElementById('currency').value;
@@ -231,24 +256,31 @@
         r.onload = async (e) => {
             const data = {
                 id: Date.now(),
-                title: document.getElementById('t').value, artist: document.getElementById('a').value,
+                title: title, artist: document.getElementById('a').value,
                 price: pText, release_date: document.getElementById('rd').value,
-                purchase_date: document.getElementById('pd').value, memo: document.getElementById('m').value,
+                purchase_date: document.getElementById('pd').value, 
+                memo: document.getElementById('m').value,
                 image: e.target.result, country: document.getElementById('country').value
             };
-            await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(data) });
-            location.reload();
+            try {
+                await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(data) });
+                location.reload();
+            } catch(err) {
+                alert("저장 중 오류가 발생했습니다.");
+                document.getElementById('loader').style.display = 'none';
+            }
         };
         r.readAsDataURL(f);
     }
 
     function openD(id) {
         const i = items.find(x => x.id == id);
+        if(!i) return;
         document.getElementById('di').src = i.image;
         document.getElementById('dt').innerText = i.title;
-        document.getElementById('da').innerText = i.artist;
-        document.getElementById('dc').innerText = i.country;
-        document.getElementById('dm').innerHTML = i.memo.replace(/\n/g, '<br>');
+        document.getElementById('da').innerText = i.artist || '아티스트 미상';
+        document.getElementById('dc').innerText = i.country || '기타';
+        document.getElementById('dm').innerHTML = (i.memo || '등록된 메모가 없습니다.').replace(/\n/g, '<br>');
         document.getElementById('dp').innerText = "가격: " + i.price;
         document.getElementById('drd').innerText = "발매일: " + (i.release_date || '-');
         document.getElementById('dpd').innerText = "구매일: " + (i.purchase_date || '-');
@@ -261,7 +293,7 @@
     window.onpopstate = () => document.getElementById('detail').style.display = 'none';
 
     async function deleteItem(id) {
-        if(!confirm('삭제할까요?')) return;
+        if(!confirm('정말 삭제하시겠습니까?')) return;
         document.getElementById('loader').style.display = 'flex';
         await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id }) });
         location.reload();
