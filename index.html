@@ -14,7 +14,7 @@
         .nav-left, .nav-right { display: flex; gap: 5px; }
         nav button { background: none; border: none; color: var(--text); font-weight: bold; cursor: pointer; font-size: 14px; padding: 10px; transition: 0.2s; }
         nav button.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
-        .view-toggle { font-size: 18px !important; opacity: 0.4; }
+        .view-toggle { font-size: 18px !important; opacity: 0.4; cursor: pointer; }
         .view-toggle.active { opacity: 1; color: var(--accent); }
 
         /* Sort Bar */
@@ -42,16 +42,20 @@
         .list-title { color: #fff; font-weight: bold; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .list-artist { color: #bbb; font-size: 14px; }
         .list-date { color: var(--dim); font-size: 13px; }
-        .list-date-group { display: none; } /* PC에선 숨김 */
+        
+        /* [중요] 모바일용 날짜 그룹은 기본적으로 숨깁니다 (PC/태블릿 환경) */
+        .list-date-group { display: none; } 
 
-        /* List View Mobile */
+        /* 모바일 반응형 디자인 (768px 이하) */
         @media (max-width: 768px) {
             .list-header { display: none; }
             .list-item { grid-template-columns: 60px 1fr auto; grid-template-rows: auto auto; gap: 4px 12px; padding: 12px; }
             .list-img { grid-row: 1 / 3; width: 55px; height: 55px; }
             .list-title { grid-column: 2; font-size: 14px; align-self: end; }
             .list-artist { grid-column: 2; color: var(--accent); font-size: 12px; align-self: start; }
-            .list-item > .list-date { display: none; } /* 개별 칸 날짜 숨김 */
+            
+            /* PC용 날짜 칸을 숨기고 모바일용 그룹을 보여줍니다 */
+            .list-item > .list-date { display: none; } 
             .list-date-group { grid-column: 3; grid-row: 1 / 3; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; gap: 3px; min-width: 80px; }
             .list-date-group .list-date { display: block; font-size: 10px; color: #777; }
             .list-date-group .list-date::before { content: attr(data-label); font-size: 8px; margin-right: 4px; opacity: 0.5; }
@@ -192,6 +196,7 @@
 </div>
 
 <script>
+    // ⚠️ 본인의 URL과 비밀번호를 다시 입력하세요!
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx-t0O5X-mApH5mu_XMRzU2lwF1KtTrnr6NPNLxh1GiLofgMH_C0zk38mC1TGnwQiq8/exec'; 
     const MY_PASSWORD = '142857';
 
