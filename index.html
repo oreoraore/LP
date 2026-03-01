@@ -6,61 +6,60 @@
     <title>VINYL ARCHIVE</title>
     <style>
         :root { --bg: #000; --card: #121212; --text: #fff; --accent: #bb86fc; --dim: #888; --border: #222; }
-        * { box-sizing: border-box; font-family: 'Pretendard', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; background: var(--bg); color: var(--text); overflow-x: hidden; transition: 0.3s; }
+        * { box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
+        body { margin: 0; background: var(--bg); color: var(--text); overflow-x: hidden; transition: background 0.3s; }
         
         /* Navigation */
         nav { position: fixed; top: 0; width: 100%; height: 60px; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); display: flex; justify-content: space-between; align-items: center; z-index: 1000; border-bottom: 1px solid var(--border); padding: 0 15px; }
-        .back-btn { background: none; border: 1px solid var(--border); color: #fff; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+        .back-btn { background: none; border: 1px solid var(--border); color: #fff; padding: 6px 12px; border-radius: 4px; cursor: pointer; display: none; }
 
         /* Toolbar */
         .toolbar { position: fixed; top: 60px; width: 100%; background: var(--bg); z-index: 900; border-bottom: 1px solid var(--border); padding: 10px; display: flex; align-items: center; }
         .sort-scroll { display: flex; gap: 8px; overflow-x: auto; flex: 1; scrollbar-width: none; }
-        .sort-scroll::-webkit-scrollbar { display: none; }
         .btn-s { white-space: nowrap; padding: 6px 12px; border-radius: 20px; background: #1a1a1a; border: 1px solid var(--border); color: var(--dim); font-size: 11px; cursor: pointer; }
         .btn-s.active { border-color: var(--accent); color: var(--accent); font-weight: bold; background: rgba(187,134,252,0.1); }
         .total-box { font-size: 12px; color: var(--accent); font-weight: 800; padding-left: 10px; border-left: 1px solid var(--border); white-space: nowrap; }
 
-        /* Main View */
+        /* Main */
         main { padding: 130px 15px 40px; max-width: 1200px; margin: 0 auto; }
-        section { display: none; animation: fade 0.4s ease; }
+        section { display: none; animation: fadeIn 0.4s ease; }
         section.active { display: block; }
-        @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Grid (Mobile 3-column) */
+        /* Grid - Mobile 3 Columns */
         .lp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
         @media (min-width: 768px) { .lp-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; } }
-        .lp-item { position: relative; aspect-ratio: 1/1; background: #080808; border-radius: 4px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+        .lp-item { position: relative; aspect-ratio: 1/1; background: #080808; border-radius: 4px; overflow: hidden; cursor: pointer; border: 2px solid transparent; }
         .lp-item img { width: 100%; height: 100%; object-fit: cover; }
-        .lp-item.selected { border-color: var(--accent); transform: scale(0.95); }
-        .lp-item.selected::after { content: '✓'; position: absolute; top: 5px; right: 5px; background: var(--accent); color: #000; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; }
+        .lp-item.selected { border-color: var(--accent); }
+        .lp-item.selected::after { content: '✓'; position: absolute; top: 5px; right: 5px; background: var(--accent); color: #000; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; }
 
-        /* ✨ 밝게 투명화 (미보유/미발매) */
-        .is-dimmed { opacity: 0.4; filter: brightness(1.8) grayscale(0.2); }
+        /* ✨ Bright Transparency (Unowned/Future) */
+        .is-dimmed { opacity: 0.4; filter: brightness(1.6) grayscale(0.3); }
 
-        /* Table View */
+        /* Table */
         .table-wrap { overflow-x: auto; background: var(--card); border-radius: 8px; border: 1px solid var(--border); }
         table { width: 100%; border-collapse: collapse; min-width: 600px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #222; font-size: 13px; }
         th { background: #1a1a1a; color: var(--dim); font-size: 11px; }
         .t-img { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; }
 
-        /* Form Controls */
+        /* Form & Batch UI */
         input, select, textarea { width: 100%; padding: 12px; background: #000; border: 1px solid #333; border-radius: 6px; color: #fff; margin-bottom: 12px; font-size: 14px; }
-        .price-grid { display: grid; grid-template-columns: 80px 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-        .batch-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 8px; border: 1px dashed #444; padding: 10px; margin-bottom: 15px; }
-        .thumb { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 4px; opacity: 0.4; border: 2px solid transparent; cursor: pointer; }
+        .price-grid { display: grid; grid-template-columns: 80px 1fr 80px; gap: 8px; margin-bottom: 12px; }
+        .batch-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 8px; margin-bottom: 15px; border: 1px dashed #444; padding: 10px; }
+        .thumb { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 4px; opacity: 0.3; border: 2px solid transparent; }
         .thumb.active { opacity: 1; border-color: var(--accent); }
 
         /* Detail (50:50) */
         #detail { position: fixed; inset: 0; background: #000; z-index: 2000; display: none; overflow-y: auto; }
         .d-flex { display: flex; min-height: 100vh; }
         .d-left { flex: 5; background: #050505; display: flex; align-items: center; justify-content: center; padding: 20px; position: sticky; top: 0; height: 100vh; }
-        .d-left img { max-width: 95%; max-height: 90%; object-fit: contain; box-shadow: 0 0 40px rgba(0,0,0,0.5); }
-        .d-right { flex: 5; padding: 60px; display: flex; flex-direction: column; justify-content: center; }
+        .d-left img { max-width: 95%; max-height: 90%; object-fit: contain; }
+        .d-right { flex: 5; padding: 50px; display: flex; flex-direction: column; justify-content: center; }
         @media (max-width: 800px) { .d-flex { flex-direction: column; } .d-left { height: 50vh; position: relative; } .d-right { padding: 30px 20px; } }
 
-        /* Loader & Bar */
+        /* Loading */
         #loader { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; }
         .spin { width: 30px; height: 30px; border: 3px solid #333; border-top: 3px solid var(--accent); border-radius: 50%; animation: s 0.8s linear infinite; }
         @keyframes s { to { transform: rotate(360deg); } }
@@ -73,13 +72,13 @@
 
 <div id="loginView" style="display:none; text-align:center; padding-top:40vh;">
     <h2 style="letter-spacing:10px; margin-bottom:30px;">VINYL ARCHIVE</h2>
-    <input type="password" id="pw" style="width:220px; text-align:center;" placeholder="PASSWORD" onkeyup="if(event.keyCode==13)auth()">
+    <input type="password" id="pw" style="width:200px; text-align:center;" placeholder="PASSWORD" onkeyup="if(event.keyCode==13)auth()">
 </div>
 
 <div id="app" style="display:none;">
     <nav>
         <div style="display:flex; align-items:center;">
-            <button id="navBack" class="back-btn" onclick="go('list')" style="margin-right:10px; display:none;">←</button>
+            <button id="navBack" class="back-btn" onclick="go('list')" style="margin-right:10px;">←</button>
             <span style="font-weight:900; letter-spacing:2px; cursor:pointer;" onclick="go('list')">VINYL ARCHIVE</span>
         </div>
         <div style="display:flex; gap:15px; align-items:center;">
@@ -127,92 +126,65 @@
             <select id="in-country"><option value="한국">한국</option><option value="일본">일본</option><option value="미국">미국</option><option value="유럽">유럽</option><option value="기타">기타</option></select>
             <div class="price-grid">
                 <select id="l-curr"><option value="₩">₩</option><option value="¥">¥</option><option value="$">$</option></select>
-                <input type="number" id="in-lprice" placeholder="정가를 입력하세요">
+                <input type="number" id="in-lprice" placeholder="정가">
                 <input type="number" id="l-ex" placeholder="환율" value="1">
             </div>
             <div class="price-grid">
                 <select id="p-curr"><option value="₩">₩</option><option value="¥">¥</option><option value="$">$</option></select>
-                <input type="number" id="in-pprice" placeholder="구매가를 입력하세요">
+                <input type="number" id="in-pprice" placeholder="구매가">
                 <input type="number" id="p-ex" placeholder="환율" value="1">
             </div>
             <div style="display:flex; gap:10px;">
                 <div style="flex:1;"><label style="font-size:11px; color:var(--dim);">발매일</label><input type="date" id="in-rd"></div>
                 <div style="flex:1;"><label style="font-size:11px; color:var(--dim);">구매일</label><input type="date" id="in-pd"></div>
             </div>
-            <textarea id="in-memo" rows="4" placeholder="메모를 입력하세요..."></textarea>
+            <textarea id="in-memo" rows="4" placeholder="메모..."></textarea>
             <button onclick="save()" style="width:100%; padding:15px; background:var(--accent); color:#000; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">SAVE ARCHIVE</button>
         </section>
     </main>
 </div>
 
-<div id="batch-bar">
-    <span id="selCnt">0 SELECTED</span>
-    <div>
-        <button onclick="toggleEdit()" style="background:none; border:1px solid #000; padding:8px 15px; border-radius:4px; margin-right:10px;">취소</button>
-        <button onclick="batchDel()" style="background:#000; color:#fff; border:none; padding:8px 15px; border-radius:4px;">일괄 삭제</button>
-    </div>
-</div>
+<div id="batch-bar"><span id="selCnt">0 SELECTED</span><button onclick="batchDel()" style="background:#000; color:#fff; border:1px solid #444; padding:8px 15px; border-radius:4px;">일괄 삭제</button></div>
 
 <div id="detail">
     <button onclick="closeD()" style="position:fixed; top:20px; left:20px; z-index:3000; background:rgba(0,0,0,0.5); color:#fff; border:none; width:40px; height:40px; border-radius:50%; font-size:20px;">←</button>
     <div class="d-flex">
         <div class="d-left"><img id="d-img"></div>
         <div class="d-right">
-            <div style="display:flex; gap:8px; margin-bottom:15px;">
-                <span id="d-c" style="background:var(--accent); color:#000; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:bold;"></span>
-                <span id="d-s" style="background:#222; padding:3px 8px; border-radius:4px; font-size:11px;"></span>
+            <h1 id="d-title" style="margin:0; font-size:28px;"></h1>
+            <h2 id="d-artist" style="margin:10px 0 30px; font-size:18px; color:var(--dim); font-weight:normal;"></h2>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; border-top:1px solid #222; padding-top:20px;">
+                <p><b>국가:</b> <span id="d-c"></span></p><p><b>보유:</b> <span id="d-s"></span></p>
+                <p><b>발매일:</b> <span id="d-rd"></span></p><p><b>구매일:</b> <span id="d-pd"></span></p>
+                <p><b>정가:</b> <span id="d-lp"></span></p><p><b>구매가:</b> <span id="d-pp"></span></p>
             </div>
-            <h1 id="d-title" style="margin:0; font-size:32px;"></h1>
-            <h2 id="d-artist" style="margin:10px 0 40px; font-size:18px; color:var(--dim); font-weight:normal;"></h2>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; border-top:1px solid #222; padding-top:25px;">
-                <div><label style="color:var(--dim); font-size:11px;">발매일</label><p id="d-rd" style="margin:5px 0;"></p></div>
-                <div><label style="color:var(--dim); font-size:11px;">구매일</label><p id="d-pd" style="margin:5px 0;"></p></div>
-                <div><label style="color:var(--dim); font-size:11px;">정가</label><p id="d-lp" style="margin:5px 0; color:var(--accent); font-weight:bold;"></p></div>
-                <div><label style="color:var(--dim); font-size:11px;">실구매가</label><p id="d-pp" style="margin:5px 0; color:var(--accent); font-weight:bold;"></p></div>
-            </div>
-            <div style="margin:30px 0; background:#111; padding:15px; border-radius:6px; border-left:3px solid var(--accent); white-space:pre-wrap; font-size:14px;" id="d-memo"></div>
-            <div style="display:flex; gap:10px; margin-top:auto;">
-                <button onclick="startEdit()" style="flex:1; padding:15px; background:#1a1a1a; color:#fff; border:1px solid #333; border-radius:6px;">수정</button>
-                <button id="delBtn" style="flex:1; padding:15px; background:none; color:#ff4444; border:1px solid #ff4444; border-radius:6px;">삭제</button>
+            <div style="margin-top:20px; padding:15px; background:#111; border-radius:6px; white-space:pre-wrap;" id="d-memo"></div>
+            <div style="display:flex; gap:10px; margin-top:30px;">
+                <button onclick="startEdit()" style="flex:1; padding:12px; background:#1a1a1a; color:#fff; border:1px solid #333; border-radius:6px;">수정</button>
+                <button id="delBtn" style="flex:1; padding:12px; background:none; color:#ff4444; border:1px solid #ff4444; border-radius:6px;">삭제</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    const GURL = 'https://script.google.com/macros/s/AKfycbzfH_l-RYjOZeS4nPtA3j6zwcQPc9JpGymJj58mm4zFTJEw8RTi70EBM-3G3x0Rb-rP/exec'; // 여기에 URL 입력
-    const PW = '142857'; // 여기에 비밀번호 입력
+    const GURL = 'https://script.google.com/macros/s/AKfycbzVI5DUhHJscAcDaAQ1on1Cu61FNPShR5VBTpxT_yA8Zi_MDkqHOFNZTd5Iv4i58lda/exec';
+    const PW = '142857';
 
     let db = [], selIds = [], isE = false;
     let vMode = 'grid', sKey = 'id', isAsc = false;
     let f_c = 'All', f_o = 'All';
-    let tempImgs = [];
+    let tempImgs = [], currentBatchIdx = 0;
 
-    window.onload = () => {
-        if(localStorage.getItem('v_auth') === 'true') init();
-        else document.getElementById('loginView').style.display = 'block';
-    };
+    window.onload = () => { if(localStorage.getItem('v_auth') === 'true') init(); else document.getElementById('loginView').style.display='block'; };
 
-    function auth() {
-        if(document.getElementById('pw').value === PW) {
-            localStorage.setItem('v_auth', 'true');
-            init();
-        } else alert('비밀번호 불일치');
-    }
+    function auth() { if(document.getElementById('pw').value === PW) { localStorage.setItem('v_auth', 'true'); init(); } else alert('틀렸습니다.'); }
 
-    async function init() {
-        document.getElementById('loginView').style.display = 'none';
-        document.getElementById('app').style.display = 'block';
-        await load();
-    }
+    async function init() { document.getElementById('loginView').style.display='none'; document.getElementById('app').style.display='block'; await load(); }
 
     async function load() {
         loadStatus(true, '동기화 중...');
-        try {
-            const r = await fetch(GURL);
-            db = await r.json();
-            sortData('id');
-        } catch(e) { console.error(e); }
+        try { const r = await fetch(GURL); db = await r.json(); sortData('id'); } catch(e) { console.error(e); }
         loadStatus(false);
     }
 
@@ -224,25 +196,20 @@
         if(page === 'list') render(); else if(page === 'add') resetF();
     }
 
-    // 사진 1:1 압축 처리
     async function handleFiles(input) {
         if(!input.files.length) return;
-        loadStatus(true, '이미지 최적화 중...');
+        loadStatus(true, '이미지 압축 중...');
         const area = document.getElementById('batchArea');
         area.innerHTML = ""; area.style.display = "grid";
-        tempImgs = [];
+        tempImgs = []; currentBatchIdx = 0;
         for(let f of input.files) {
             const b64 = await compress(f);
             tempImgs.push(b64);
             const img = document.createElement('img');
             img.src = b64; img.className = 'thumb';
-            img.onclick = function() {
-                document.querySelectorAll('.thumb').forEach(t=>t.classList.remove('active'));
-                this.classList.add('active'); window.curImg = b64;
-            };
             area.appendChild(img);
         }
-        if(tempImgs.length) { area.firstChild.classList.add('active'); window.curImg = tempImgs[0]; }
+        if(tempImgs.length) updateBatchUI();
         loadStatus(false);
     }
 
@@ -265,21 +232,24 @@
         });
     }
 
-    // 정렬 (한/일/영 및 일본어 발음 정렬)
-    function sortData(key) {
-        if(sKey === key) isAsc = !isAsc;
-        else { sKey = key; isAsc = (key === 'id' ? false : true); }
-        
-        const jaCol = new Intl.Collator('ja', { sensitivity: 'base', numeric: true });
+    function updateBatchUI() {
+        const thumbs = document.querySelectorAll('.thumb');
+        thumbs.forEach((t, i) => {
+            t.classList.remove('active');
+            if(i === currentBatchIdx) { t.classList.add('active'); window.curImg = tempImgs[i]; }
+        });
+    }
 
+    function sortData(key) {
+        if(sKey === key) isAsc = !isAsc; else { sKey = key; isAsc = (key === 'id' ? false : true); }
+        const jaCol = new Intl.Collator('ja', { sensitivity: 'base' });
         db.sort((a, b) => {
             let vA = a[key], vB = b[key];
             if(key === 'price') {
-                vA = Number(a.list_price||0) * (a.l_curr === '₩' ? 1 : Number(a.l_ex||1));
-                vB = Number(b.list_price||0) * (b.l_curr === '₩' ? 1 : Number(b.l_ex||1));
+                vA = Number(a.list_price||0) * (a.l_curr==='₩'?1:Number(a.l_ex||1));
+                vB = Number(b.list_price||0) * (b.l_curr==='₩'?1:Number(b.l_ex||1));
             } else if(key === 'country') {
-                const p = {"한국":1, "일본":2};
-                vA = p[vA]||3; vB = p[vB]||3;
+                const p = {"한국":1, "일본":2}; vA = p[vA]||3; vB = p[vB]||3;
             } else if(['title', 'artist'].includes(key)) {
                 const getP = (s) => {
                     if(!s) return 4;
@@ -292,14 +262,12 @@
                 if(pA !== pB) return isAsc ? pA - pB : pB - pA;
                 return isAsc ? jaCol.compare(vA, vB) : jaCol.compare(vB, vA);
             }
-            if(vA < vB) return isAsc ? -1 : 1;
-            if(vA > vB) return isAsc ? 1 : -1;
-            return 0;
+            if(vA < vB) return isAsc ? -1 : 1; if(vA > vB) return isAsc ? 1 : -1; return 0;
         });
-
-        document.querySelectorAll('.btn-s').forEach(b => b.classList.remove('active'));
-        const target = document.getElementById('s-'+key);
-        if(target) target.classList.add('active'), target.innerText = target.innerText.split(' ')[0] + (isAsc ? ' ↑' : ' ↓');
+        document.querySelectorAll('.btn-s').forEach(b => {
+            b.classList.remove('active');
+            if(b.id === 's-'+key) { b.classList.add('active'); b.innerText = b.innerText.split(' ')[0] + (isAsc ? ' ↑' : ' ↓'); }
+        });
         render();
     }
 
@@ -312,7 +280,7 @@
         if(vMode === 'grid') {
             document.getElementById('grid-view').innerHTML = f.map(i => {
                 const isFut = i.release_date && new Date(i.release_date) > today;
-                const isOwn = (String(i.owned) === 'true');
+                const isOwn = String(i.owned) === 'true';
                 const dim = (!isOwn || isFut) ? 'is-dimmed' : '';
                 const sel = selIds.includes(String(i.id)) ? 'selected' : '';
                 return `<div class="lp-item ${dim} ${sel}" onclick="clickItem('${i.id}')"><img src="${i.image}"></div>`;
@@ -321,40 +289,28 @@
             document.getElementById('table-body').innerHTML = f.map((i, idx) => {
                 const sel = selIds.includes(String(i.id)) ? 'selected' : '';
                 return `<tr class="${sel}" onclick="clickItem('${i.id}')">
-                    <td style="text-align:center; color:var(--accent); font-weight:bold;">${idx+1}</td>
-                    <td><img src="${i.image}" class="t-img"></td>
-                    <td style="font-weight:bold;">${i.title || '-'}</td>
-                    <td>${i.artist || '-'}</td>
-                    <td>${(i.release_date||"").slice(0,10)}</td>
-                    <td>${(i.purchase_date||"").slice(0,10)}</td>
+                    <td style="text-align:center; font-weight:bold; color:var(--accent);">${idx+1}</td>
+                    <td><img src="${i.image}" class="t-img"></td><td>${i.title||'-'}</td><td>${i.artist||'-'}</td>
+                    <td>${(i.release_date||"").slice(0,10)}</td><td>${(i.purchase_date||"").slice(0,10)}</td>
                 </tr>`;
             }).join('');
         }
     }
 
-    function clickItem(id) {
-        if(isE) {
-            if(selIds.includes(id)) selIds = selIds.filter(x => x !== id);
-            else selIds.push(id);
-            document.getElementById('selCnt').innerText = `${selIds.length} SELECTED`;
-            render();
-        } else openD(id);
-    }
+    function clickItem(id) { if(isE) { if(selIds.includes(id)) selIds = selIds.filter(x => x !== id); else selIds.push(id); document.getElementById('selCnt').innerText = `${selIds.length} SELECTED`; render(); } else openD(id); }
 
     function openD(id) {
-        const i = db.find(x => x.id == id);
-        if(!i) return;
+        const i = db.find(x => x.id == id); if(!i) return;
         document.getElementById('d-img').src = i.image;
         document.getElementById('d-title').innerText = i.title || "Untitled";
         document.getElementById('d-artist').innerText = i.artist || "Unknown";
         document.getElementById('d-c').innerText = i.country || "기타";
         document.getElementById('d-s').innerText = String(i.owned) === 'true' ? "보유 중" : "미보유";
-        document.getElementById('d-rd').innerText = (i.release_date||"").slice(0,10) || "-";
-        document.getElementById('d-pd').innerText = (i.purchase_date||"").slice(0,10) || "-";
+        document.getElementById('d-rd').innerText = (i.release_date||"").slice(0,10);
+        document.getElementById('d-pd').innerText = (i.purchase_date||"").slice(0,10);
         document.getElementById('d-memo').innerText = i.memo || "";
-        
         const fmt = (v, c, e) => {
-            if(!v) return "0";
+            if(!v) return "₩ 0";
             const val = Number(v).toLocaleString();
             if(c === '₩') return `₩ ${val}`;
             return `${c}${val} (약 ₩ ${Math.round(v * (e||1)).toLocaleString()})`;
@@ -362,7 +318,7 @@
         document.getElementById('d-lp').innerText = fmt(i.list_price, i.l_curr, i.l_ex);
         document.getElementById('d-pp').innerText = fmt(i.purchase_price, i.p_curr, i.p_ex);
         document.getElementById('detail').style.display = 'block';
-        document.getElementById('delBtn').onclick = () => del(i.id);
+        document.getElementById('delBtn').onclick = () => del(id);
         window.activeId = id;
     }
 
@@ -370,126 +326,33 @@
         const eid = document.getElementById('editId').value;
         let img = eid ? db.find(x => x.id == eid).image : window.curImg;
         if(!img) return alert('이미지를 선택하세요.');
-
         loadStatus(true, '저장 중...');
         const payload = {
-            action: eid ? 'edit' : 'add',
-            id: eid || Date.now(),
-            owned: document.getElementById('isOwned').checked,
-            title: document.getElementById('in-title').value,
-            artist: document.getElementById('in-artist').value,
-            country: document.getElementById('in-country').value,
-            l_curr: document.getElementById('l-curr').value,
-            l_ex: document.getElementById('l-ex').value || 1,
-            p_curr: document.getElementById('p-curr').value,
-            p_ex: document.getElementById('p-ex').value || 1,
-            list_price: document.getElementById('in-lprice').value,
-            purchase_price: document.getElementById('in-pprice').value,
-            release_date: document.getElementById('in-rd').value,
-            purchase_date: document.getElementById('in-pd').value,
-            memo: document.getElementById('in-memo').value,
-            image: img
+            action: eid ? 'edit' : 'add', id: eid || Date.now(), owned: document.getElementById('isOwned').checked,
+            title: document.getElementById('in-title').value, artist: document.getElementById('in-artist').value,
+            country: document.getElementById('in-country').value, l_curr: document.getElementById('l_curr').value, l_ex: document.getElementById('l_ex').value,
+            p_curr: document.getElementById('p_curr').value, p_ex: document.getElementById('p_ex').value,
+            list_price: document.getElementById('in-lprice').value, purchase_price: document.getElementById('in-pprice').value,
+            release_date: document.getElementById('in-rd').value, purchase_date: document.getElementById('in-pd').value,
+            memo: document.getElementById('in-memo').value, image: img
         };
-
         await fetch(GURL, { method: 'POST', body: JSON.stringify(payload) });
-        
-        if(!eid && tempImgs.length > 1) {
-            tempImgs = tempImgs.filter(x => x !== window.curImg);
-            const area = document.getElementById('batchArea');
-            area.innerHTML = "";
-            tempImgs.forEach(s => {
-                const img = document.createElement('img');
-                img.src = s; img.className = 'thumb';
-                img.onclick = function() { 
-                    document.querySelectorAll('.thumb').forEach(t=>t.classList.remove('active'));
-                    this.classList.add('active'); window.curImg = s;
-                };
-                area.appendChild(img);
-            });
-            area.firstChild.classList.add('active'); window.curImg = tempImgs[0];
-            resetPartial(); loadStatus(false); alert('저장됨! 다음 사진의 정보를 입력하세요.');
-        } else {
-            location.reload();
-        }
+        if(!eid && tempImgs.length > 1 && currentBatchIdx < tempImgs.length - 1) {
+            currentBatchIdx++; updateBatchUI(); resetPartial(); loadStatus(false); alert('저장됨! 다음 항목을 입력하세요.');
+        } else { location.reload(); }
     }
 
-    function toggleView() {
-        vMode = (vMode === 'grid' ? 'table' : 'grid');
-        document.getElementById('vIcon').innerText = (vMode === 'grid' ? '≡' : '▦');
-        document.getElementById('grid-view').style.display = (vMode === 'grid' ? 'grid' : 'none');
-        document.getElementById('table-view').style.display = (vMode === 'table' ? 'block' : 'none');
-        render();
-    }
-    function toggleEdit() {
-        isE = !isE; selIds = [];
-        document.getElementById('editBtn').innerText = (isE ? "취소" : "편집");
-        document.getElementById('batch-bar').style.display = (isE ? "flex" : "none");
-        render();
-    }
-    async function batchDel() {
-        if(!selIds.length || !confirm('선택한 항목을 모두 삭제할까요?')) return;
-        loadStatus(true, '일괄 삭제 중...');
-        for(let id of selIds) await fetch(GURL, { method:'POST', body:JSON.stringify({action:'delete', id}) });
-        location.reload();
-    }
-    async function del(id) {
-        if(!confirm('정말 삭제할까요?')) return;
-        loadStatus(true, '삭제 중...');
-        await fetch(GURL, { method:'POST', body:JSON.stringify({action:'delete', id}) });
-        location.reload();
-    }
-    function startEdit() {
-        const i = db.find(x => x.id == window.activeId);
-        closeD(); go('add');
-        document.getElementById('editId').value = i.id;
-        document.getElementById('isOwned').checked = String(i.owned) === 'true';
-        document.getElementById('in-title').value = i.title;
-        document.getElementById('in-artist').value = i.artist;
-        document.getElementById('in-country').value = i.country;
-        document.getElementById('l-curr').value = i.l_curr;
-        document.getElementById('l-ex').value = i.l_ex;
-        document.getElementById('in-lprice').value = i.list_price;
-        document.getElementById('p-curr').value = i.p_curr;
-        document.getElementById('p-ex').value = i.p_ex;
-        document.getElementById('in-pprice').value = i.purchase_price;
-        document.getElementById('in-rd').value = (i.release_date||"").slice(0,10);
-        document.getElementById('in-pd').value = (i.purchase_date||"").slice(0,10);
-        document.getElementById('in-memo').value = i.memo;
-        document.getElementById('formTitle').innerText = "EDIT VINYL";
-        document.getElementById('batchArea').style.display = "none";
-    }
-    function resetF() {
-        resetPartial();
-        document.getElementById('editId').value = "";
-        document.getElementById('fileIn').value = "";
-        document.getElementById('batchArea').innerHTML = "";
-        document.getElementById('batchArea').style.display = "none";
-        document.getElementById('formTitle').innerText = "REGISTER VINYL";
-    }
-    function resetPartial() {
-        document.getElementById('in-title').value = ""; document.getElementById('in-artist').value = "";
-        document.getElementById('in-lprice').value = ""; document.getElementById('in-pprice').value = "";
-        document.getElementById('in-rd').value = ""; document.getElementById('in-pd').value = "";
-        document.getElementById('in-memo').value = "";
-    }
-    function fC() {
-        const c = ['All', '한국', '일본', '미국', '유럽', '기타'];
-        f_c = c[(c.indexOf(f_c) + 1) % c.length];
-        document.getElementById('f-c').innerText = `국가: ${f_c==='All'?'전체':f_c}`;
-        render();
-    }
-    function fO() {
-        const o = ['All', '보유', '미보유'];
-        f_o = o[(o.indexOf(f_o) + 1) % o.length];
-        document.getElementById('f-o').innerText = `상태: ${f_o==='All'?'전체':f_o}`;
-        render();
-    }
+    function resetPartial() { document.getElementById('in-title').value = ""; document.getElementById('in-artist').value = ""; document.getElementById('in-lprice').value = ""; document.getElementById('in-pprice').value = ""; document.getElementById('in-rd').value = ""; document.getElementById('in-pd').value = ""; document.getElementById('in-memo').value = ""; }
+    function resetF() { resetPartial(); document.getElementById('editId').value = ""; document.getElementById('fileIn').value = ""; document.getElementById('batchArea').innerHTML = ""; document.getElementById('batchArea').style.display = "none"; document.getElementById('formTitle').innerText = "REGISTER VINYL"; }
+    function toggleView() { vMode = (vMode==='grid'?'table':'grid'); document.getElementById('vIcon').innerText = (vMode==='grid'?'≡':'▦'); document.getElementById('grid-view').style.display = (vMode==='grid'?'grid':'none'); document.getElementById('table-view').style.display = (vMode==='table'?'block':'none'); render(); }
+    function toggleEdit() { isE = !isE; selIds = []; document.getElementById('editBtn').innerText = (isE?"취소":"편집"); document.getElementById('batch-bar').style.display = (isE?"flex":"none"); render(); }
+    async function batchDel() { if(!selIds.length || !confirm('삭제할까요?')) return; loadStatus(true, '삭제 중...'); for(let id of selIds) await fetch(GURL, { method:'POST', body:JSON.stringify({action:'delete', id}) }); location.reload(); }
+    async function del(id) { if(!confirm('정말 삭제할까요?')) return; loadStatus(true, '삭제 중...'); await fetch(GURL, { method:'POST', body:JSON.stringify({action:'delete', id}) }); location.reload(); }
+    function startEdit() { const i = db.find(x => x.id == window.activeId); closeD(); go('add'); document.getElementById('editId').value = i.id; document.getElementById('isOwned').checked = String(i.owned)==='true'; document.getElementById('in-title').value = i.title; document.getElementById('in-artist').value = i.artist; document.getElementById('in-country').value = i.country; document.getElementById('l-curr').value = i.l_curr; document.getElementById('l-ex').value = i.l_ex; document.getElementById('in-lprice').value = i.list_price; document.getElementById('p-curr').value = i.p_curr; document.getElementById('p-ex').value = i.p_ex; document.getElementById('in-pprice').value = i.purchase_price; document.getElementById('in-rd').value = (i.release_date||"").slice(0,10); document.getElementById('in-pd').value = (i.purchase_date||"").slice(0,10); document.getElementById('in-memo').value = i.memo; document.getElementById('formTitle').innerText = "EDIT VINYL"; document.getElementById('batchArea').style.display = "none"; }
     function closeD() { document.getElementById('detail').style.display = 'none'; }
-    function loadStatus(s, t) {
-        document.getElementById('l-msg').innerText = t || "";
-        document.getElementById('loader').style.display = s ? 'flex' : 'none';
-    }
+    function loadStatus(s, t) { document.getElementById('l-msg').innerText = t || ""; document.getElementById('loader').style.display = s ? 'flex' : 'none'; }
+    function fC() { const c = ['All', '한국', '일본', '미국', '유럽', '기타']; f_c = c[(c.indexOf(f_c) + 1) % c.length]; document.getElementById('f-c').innerText = `국가: ${f_c==='All'?'전체':f_c}`; render(); }
+    function fO() { const o = ['All', '보유', '미보유']; f_o = o[(o.indexOf(f_o) + 1) % o.length]; document.getElementById('f-o').innerText = `상태: ${f_o==='All'?'전체':f_o}`; render(); }
 </script>
 </body>
 </html>
-
