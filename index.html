@@ -14,10 +14,58 @@
         .page.active { display: block; opacity: 1; }
 
         nav { position: fixed; top: 0; width: 100%; height: 60px; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 1000; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; border-bottom: 1px solid var(--border); }
-        .toolbar { position: fixed; top: 60px; width: 100%; background: var(--bg); z-index: 900; border-bottom: 1px solid var(--border); padding: 10px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-        
-        .total-display { width: 100%; text-align: right; font-size: 11px; color: var(--accent); margin-top: 5px; font-weight: bold; }
+/* 툴바 기본 설정 (PC/태블릿) */
+.toolbar { 
+    position: fixed; 
+    top: 60px; 
+    width: 100%; 
+    background: rgba(0, 0, 0, 0.9); 
+    backdrop-filter: blur(5px);
+    z-index: 900; 
+    border-bottom: 1px solid var(--border); 
+    padding: 10px 15px; 
+    display: flex; 
+    align-items: center; /* 세로 중앙 정렬 */
+    gap: 10px;
+    flex-wrap: nowrap; /* PC에서는 한 줄 유지 */
+    overflow-x: auto; /* 버튼이 너무 많으면 가로 스크롤 */
+    scrollbar-width: none; /* 파이어폭스 스크롤바 숨김 */
+}
+.toolbar::-webkit-scrollbar { display: none; } /* 크롬 스크롤바 숨김 */
 
+/* PC에서의 Total 위치: 정렬 버튼들 맨 오른쪽 */
+.total-display { 
+    margin-left: auto; /* 왼쪽 여백을 최대로 밀어서 오른쪽 끝 배치 */
+    white-space: nowrap;
+    font-size: 13px; 
+    color: var(--accent); 
+    font-weight: bold;
+    padding-left: 10px;
+}
+
+/* --- 모바일 최적화 (화면 너비 800px 이하) --- */
+@media (max-width: 800px) {
+    .toolbar {
+        flex-wrap: wrap; /* 모바일에서는 공간 부족 시 줄바꿈 허용 */
+        padding: 8px;
+        gap: 6px;
+    }
+
+    .total-display { 
+        width: 100%; /* 강제로 한 줄을 다 차지하게 함 */
+        text-align: right; /* 오른쪽 정렬 */
+        margin-top: 5px; /* 버튼들과의 간격 확보 */
+        margin-left: 0;
+        border-top: 1px solid #111; /* 구분선 (선택사항) */
+        padding-top: 5px;
+        font-size: 11px;
+    }
+
+    /* 툴바가 두 줄이 될 수 있으므로 리스트 시작 위치 조정 */
+    .page { 
+        padding-top: 170px; /* 툴바 높이 증가에 맞춰 본문 밀어내기 */
+    }
+}
         .btn-s { padding: 6px 12px; border-radius: 20px; background: #1a1a1a; border: 1px solid var(--border); color: #888; font-size: 11px; cursor: pointer; transition: 0.2s; }
         .btn-s.active { border-color: var(--accent); color: var(--accent); font-weight: bold; }
 
@@ -399,3 +447,4 @@
 </script>
 </body>
 </html>
+
