@@ -322,7 +322,7 @@
         document.getElementById('d-title').innerText = i.title;
         document.getElementById('d-artist').innerText = i.artist;
         document.getElementById('d-c').innerText = i.country;
-        document.getElementById('d-s').innerText = i.owned ? "보유 중" : "미보유 (위시리스트)";
+        document.getElementById('d-s').innerText = i.owned ? "보유 중" : "미보유";
         document.getElementById('d-rd').innerText = formatDateLabel(i.release_date);
         document.getElementById('d-pd').innerText = formatDateLabel(i.purchase_date);
         document.getElementById('d-memo').innerText = i.memo || "작성된 메모가 없습니다.";
@@ -423,3 +423,4 @@
 </script>
 </body>
 </html>
+
