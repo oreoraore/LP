@@ -345,61 +345,46 @@
         location.reload();
     }
 
-// 상세 창에서 호출하는 단일 삭제 함수
+// 상세 창에서의 단일 삭제
 async function delItem(id) {
     if (!id || id === 'undefined') {
-        alert("삭제할 수 없는 유효하지 않은 ID입니다.");
+        alert("ID가 유효하지 않습니다. 페이지를 새로고침 후 다시 시도해주세요.");
         return;
     }
-
     if (!confirm('정말 이 앨범을 삭제하시겠습니까?')) return;
 
     showLoading(true, '앨범 삭제 중...');
-
     try {
-        const response = await fetch(GAS_URL, {
+        // GAS에 삭제 요청 전송
+        await fetch(GAS_URL, {
             method: 'POST',
-            mode: 'no-cors', // CORS 정책 대응 (GAS 환경에 따라 필요할 수 있음)
-            body: JSON.stringify({
-                action: 'delete',
-                id: String(id) // ID를 강제로 문자열화
-            })
+            mode: 'no-cors', // CORS 문제 방지
+            body: JSON.stringify({ action: 'delete', id: String(id) })
         });
-
-        // 'no-cors' 모드일 경우 응답 내용을 읽을 수 없으므로 잠시 후 새로고침
-        setTimeout(() => {
-            location.reload();
-        }, 1500);
-
-    } catch (error) {
-        console.error("삭제 요청 오류:", error);
-        alert("통신 중 오류가 발생했습니다.");
+        
+        // no-cors 모드에서는 응답을 읽을 수 없으므로 잠시 대기 후 강제 새로고침
+        setTimeout(() => { location.reload(); }, 1000);
+    } catch (e) {
+        alert("통신 오류 발생");
         showLoading(false);
     }
 }
 
-// 일괄 삭제 함수
+// 일괄 삭제
 async function batchDelete() {
-    if (selectedIds.length === 0) return;
+    if (!selectedIds.length) return;
     if (!confirm(`${selectedIds.length}개의 항목을 삭제하시겠습니까?`)) return;
 
     showLoading(true, '일괄 삭제 중...');
-
     try {
         await fetch(GAS_URL, {
             method: 'POST',
             mode: 'no-cors',
-            body: JSON.stringify({
-                action: 'delete',
-                id: selectedIds.map(String) // 모든 ID를 문자열 배열로 전달
-            })
+            body: JSON.stringify({ action: 'delete', id: selectedIds.map(String) })
         });
-
-        setTimeout(() => {
-            location.reload();
-        }, 2000);
-    } catch (error) {
-        alert("삭제 실패");
+        setTimeout(() => { location.reload(); }, 1500);
+    } catch (e) {
+        alert("삭제 중 오류가 발생했습니다.");
         showLoading(false);
     }
 }
@@ -429,4 +414,5 @@ async function batchDelete() {
 </script>
 </body>
 </html>
+
 
