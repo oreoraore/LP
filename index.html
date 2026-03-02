@@ -5,202 +5,199 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VINYL ARCHIVE</title>
     <style>
-        :root { --bg: #000; --card: #111; --accent: #00f2ff; --text: #fff; --dim: #888; --border: #262626; }
+        :root { --bg: #000; --card: #121212; --accent: #00f2ff; --text: #fff; --dim: #888; --border: #222; }
         * { box-sizing: border-box; font-family: 'Pretendard', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: var(--bg); color: var(--text); overflow-x: hidden; }
         
-        /* 부드러운 인터페이스 전환 */
-        .page { display: none; opacity: 0; transition: transform 0.3s ease, opacity 0.3s ease; }
-        .page.active { display: block; opacity: 1; animation: slideIn 0.4s ease; }
-        @keyframes slideIn { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        /* 페이지 전환 애니메이션 */
+        .page { display: none; opacity: 0; transition: 0.3s ease-in-out; }
+        .page.active { display: block; opacity: 1; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        nav { position: fixed; top: 0; width: 100%; height: 60px; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); z-index: 1000; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; }
+        nav { position: fixed; top: 0; width: 100%; height: 60px; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 1000; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; }
         .toolbar { position: fixed; top: 60px; width: 100%; background: var(--bg); z-index: 900; border-bottom: 1px solid var(--border); padding: 10px; display: flex; align-items: center; overflow-x: auto; white-space: nowrap; gap: 8px; scrollbar-width: none; }
-        .btn-s { padding: 8px 14px; border-radius: 20px; background: #1a1a1a; border: 1px solid var(--border); color: var(--dim); font-size: 11px; cursor: pointer; }
+        .btn-s { padding: 8px 14px; border-radius: 20px; background: #1a1a1a; border: 1px solid var(--border); color: var(--dim); font-size: 11px; cursor: pointer; transition: 0.2s; }
         .btn-s.active { border-color: var(--accent); color: var(--accent); background: rgba(0, 242, 255, 0.1); }
-        .total-label { position: fixed; top: 72px; right: 15px; font-size: 12px; font-weight: bold; color: var(--accent); z-index: 950; }
+        .total-badge { position: fixed; top: 72px; right: 15px; font-size: 12px; font-weight: bold; color: var(--accent); z-index: 950; }
 
-        main { padding: 130px 10px 80px; }
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        @media (min-width: 800px) { .grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; } }
+        main { padding: 125px 10px 80px; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        @media (min-width: 800px) { .grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; } }
         
-        .lp-item { aspect-ratio: 1/1; background: #080808; border-radius: 6px; overflow: hidden; cursor: pointer; border: 2px solid transparent; position: relative; transition: 0.2s; }
+        .lp-item { aspect-ratio: 1/1; background: #080808; border-radius: 4px; overflow: hidden; cursor: pointer; border: 2px solid transparent; position: relative; }
         .lp-item img { width: 100%; height: 100%; object-fit: cover; }
         .lp-item.selected { border-color: var(--accent); }
-        .lp-item.selected::after { content: '✓'; position: absolute; inset: 0; background: rgba(0,242,255,0.4); display: flex; align-items: center; justify-content: center; font-size: 30px; color: #fff; font-weight: bold; }
+        .lp-item.selected::after { content: '✓'; position: absolute; inset: 0; background: rgba(0,242,255,0.4); display: flex; align-items: center; justify-content: center; font-size: 24px; color: #fff; font-weight: bold; }
         
-        /* 밝게 투명화 효과 */
-        .is-dimmed { opacity: 0.4; filter: brightness(1.6); }
+        /* 밝은 투명화 */
+        .is-dimmed { opacity: 0.4; filter: brightness(1.5); }
 
         #detail { position: fixed; inset: 0; background: #000; z-index: 2000; display: none; overflow-y: auto; }
         .d-flex { display: flex; min-height: 100vh; }
-        .d-left { flex: 5; display: flex; align-items: center; justify-content: center; background: #050505; }
-        .d-right { flex: 5; padding: 40px; display: flex; flex-direction: column; justify-content: center; }
-        @media (max-width: 800px) { .d-flex { flex-direction: column; } .d-left { height: 50vh; } .d-right { padding: 20px; } }
+        .d-left { flex: 50; background: #050505; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .d-right { flex: 50; padding: 40px; display: flex; flex-direction: column; justify-content: center; }
+        @media (max-width: 800px) { .d-flex { flex-direction: column; } .d-left { height: 45vh; flex: none; } .d-right { padding: 20px; flex: none; } }
 
         table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px 10px; border-bottom: 1px solid #222; text-align: left; font-size: 13px; }
+        th, td { padding: 12px 8px; border-bottom: 1px solid #222; text-align: left; font-size: 12px; }
         .t-img { width: 45px; height: 45px; object-fit: cover; border-radius: 4px; }
 
         input, select, textarea { width: 100%; padding: 14px; background: #111; border: 1px solid #333; color: #fff; border-radius: 8px; margin-bottom: 12px; font-size: 14px; outline: none; }
-        .price-grid { display: grid; grid-template-columns: 80px 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-        .check-group { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
-        .check-group input { width: 22px; height: 22px; margin: 0; cursor: pointer; }
+        .price-row { display: grid; grid-template-columns: 80px 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        .check-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; cursor: pointer; }
+        .check-wrap input { width: 20px; height: 20px; margin: 0; }
         
-        #batch-bar { position: fixed; bottom: 0; width: 100%; height: 75px; background: var(--accent); color: #000; display: none; align-items: center; justify-content: space-between; padding: 0 20px; font-weight: bold; z-index: 1500; }
-        #loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        #batch-bar { position: fixed; bottom: 0; width: 100%; height: 70px; background: var(--accent); color: #000; display: none; align-items: center; justify-content: space-between; padding: 0 20px; font-weight: bold; z-index: 1500; }
+        #loader { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
-<div id="loading-overlay"><div id="load-msg" style="color:var(--accent); font-weight: bold; letter-spacing: 2px;">SYNCING...</div></div>
+<div id="loader"><div id="lmsg" style="color:var(--accent); font-weight: bold;">SYNCING...</div></div>
 
-<div id="login-screen" style="display:none; text-align:center; padding-top:30vh;">
-    <h1 style="letter-spacing:15px; margin-bottom:50px;">VINYL ARCHIVE</h1>
-    <input type="password" id="pw-input" style="width:200px; text-align:center; font-size: 20px;" placeholder="PIN" onkeyup="if(event.keyCode==13)login()">
+<div id="loginPage" style="display:none; text-align:center; padding-top:35vh;">
+    <h1 style="letter-spacing:10px; margin-bottom:40px;">VINYL ARCHIVE</h1>
+    <input type="password" id="pin" style="width:200px; text-align:center; font-size: 20px;" placeholder="PASSWORD" onkeyup="if(event.keyCode==13)doLogin()">
 </div>
 
 <div id="app" style="display:none;">
     <nav>
         <div style="display:flex; align-items:center;">
-            <button id="back-btn" class="btn-s" style="display:none;" onclick="go('list')">← BACK</button>
-            <span style="font-weight:900; letter-spacing:3px; font-size:18px; margin-left: 5px;">VINYL ARCHIVE</span>
+            <button id="navBack" class="btn-s" style="display:none;" onclick="go('list')">← BACK</button>
+            <span style="font-weight:900; letter-spacing:2px; font-size:18px;">VINYL ARCHIVE</span>
         </div>
         <div style="display:flex; gap:12px; align-items: center;">
-            <span onclick="toggleView()" id="view-icon" style="cursor:pointer; font-size:22px;">▦</span>
-            <button onclick="go('add')" style="background:var(--accent); color:#000; border:none; padding:6px 18px; border-radius:20px; font-weight:bold; font-size:12px;">ADD</button>
-            <span onclick="toggleEditMode()" id="edit-toggle" style="cursor:pointer; color:var(--dim); font-size:14px;">EDIT</span>
+            <span id="viewToggle" onclick="toggleView()" style="cursor:pointer; font-size:20px;">▦</span>
+            <button onclick="go('add')" style="background:var(--accent); color:#000; border:none; padding:5px 15px; border-radius:20px; font-weight:bold; font-size:12px;">ADD</button>
+            <span onclick="toggleSelectMode()" id="editToggleBtn" style="cursor:pointer; color:var(--dim); font-size:13px;">EDIT</span>
         </div>
     </nav>
 
     <div class="toolbar" id="toolbar">
-        <button id="s-id" class="btn-s active" onclick="setSort('id')">등록순 ↓</button>
-        <button id="s-title" class="btn-s" onclick="setSort('title')">앨범명</button>
-        <button id="s-artist" class="btn-s" onclick="setSort('artist')">가수명</button>
-        <button id="s-release_date" class="btn-s" onclick="setSort('release_date')">발매일</button>
-        <button id="s-purchase_date" class="btn-s" onclick="setSort('purchase_date')">구매일</button>
-        <button id="s-price" class="btn-s" onclick="setSort('price')">가격순</button>
-        <button id="s-country" class="btn-s" onclick="setSort('country')">나라순</button>
-        <button onclick="filterBy('country')" class="btn-s" id="f-c">나라: 전체</button>
-        <button onclick="filterBy('owned')" class="btn-s" id="f-o">보유여부: 전체</button>
+        <button id="s-id" class="btn-s active" onclick="sort('id')">등록순 ↓</button>
+        <button id="s-title" class="btn-s" onclick="sort('title')">앨범명</button>
+        <button id="s-artist" class="btn-s" onclick="sort('artist')">가수명</button>
+        <button id="s-release_date" class="btn-s" onclick="sort('release_date')">발매일</button>
+        <button id="s-purchase_date" class="btn-s" onclick="sort('purchase_date')">구매일</button>
+        <button id="s-price" class="btn-s" onclick="sort('price')">가격순</button>
+        <button id="s-country" class="btn-s" onclick="sort('country')">나라순</button>
+        <button onclick="fC()" class="btn-s" id="fc">나라: 전체</button>
+        <button onclick="fO()" class="btn-s" id="fo">보유여부: 전체</button>
     </div>
-    <div class="total-label" id="total-count">0</div>
+    <div class="total-badge" id="totalCount">0</div>
 
     <main>
         <section id="list" class="page active">
-            <div id="grid-view" class="grid"></div>
-            <div id="table-view" style="display:none;">
+            <div id="g-view" class="grid"></div>
+            <div id="t-view" style="display:none;">
                 <table>
                     <thead><tr><th>No</th><th>사진</th><th>앨범명</th><th>가수명</th><th>발매일</th><th>구매일</th></tr></thead>
-                    <tbody id="table-body"></tbody>
+                    <tbody id="t-body"></tbody>
                 </table>
-                <button class="btn-s" style="margin-top:30px;" onclick="go('list')">← BACK</button>
+                <button class="btn-s" style="margin-top:20px;" onclick="go('list')">← BACK</button>
             </div>
         </section>
 
         <section id="add" class="page">
-            <h2 id="form-title" style="color:var(--accent)">NEW ARCHIVE</h2>
-            <input type="hidden" id="edit-id">
-            <div class="check-group">
-                <input type="checkbox" id="f-owned" checked>
-                <label for="f-owned">보유 중</label>
-            </div>
-            <input type="file" id="f-img" accept="image/*" multiple onchange="handleImage(this)">
+            <h2 id="fTitle">정보 입력</h2>
+            <input type="hidden" id="eid">
+            <label class="check-wrap"><input type="checkbox" id="f-owned" checked><span>보유 중</span></label>
+            <input type="file" id="f-img" accept="image/*" multiple onchange="handleFile(this)">
             <input type="text" id="f-title" placeholder="앨범명">
             <input type="text" id="f-artist" placeholder="가수명">
             <select id="f-country"><option value="한국">한국</option><option value="일본">일본</option><option value="기타">기타</option></select>
             
-            <div class="price-grid">
-                <select id="f-l-curr"><option value="₩">₩</option><option value="¥">¥</option><option value="$">$</option></select>
-                <input type="number" id="f-l-price" placeholder="정가">
-                <input type="number" id="f-l-ex" value="1" placeholder="환율">
+            <div class="price-row">
+                <select id="f-lcurr"><option value="₩">₩</option><option value="¥">¥</option><option value="$">$</option></select>
+                <input type="number" id="f-lprice" placeholder="정가">
+                <input type="number" id="f-lex" value="1" placeholder="환율">
             </div>
-            <div class="price-grid">
-                <select id="f-p-curr"><option value="₩">₩</option><option value="¥">¥</option><option value="$">$</option></select>
-                <input type="number" id="f-p-price" placeholder="구매가">
-                <input type="number" id="f-p-ex" value="1" placeholder="환율">
+            <div class="price-row">
+                <select id="f-pcurr"><option value="₩">₩</option><option value="¥">¥</option><option value="$">$</option></select>
+                <input type="number" id="f-pprice" placeholder="구매가">
+                <input type="number" id="f-pex" value="1" placeholder="환율">
             </div>
             
             <div style="display:flex; gap:10px;">
                 <div style="flex:1;"><label style="font-size:11px; color:var(--dim);">발매일</label><input type="date" id="f-rd"></div>
                 <div style="flex:1;"><label style="font-size:11px; color:var(--dim);">구매일</label><input type="date" id="f-pd"></div>
             </div>
-            <textarea id="f-memo" rows="5" placeholder="메모를 입력하세요..."></textarea>
-            <button onclick="save()" style="width:100%; padding:20px; background:var(--accent); color:#000; border:none; border-radius:10px; font-weight:bold; font-size:16px;">SAVE ARCHIVE</button>
-            <button class="btn-s" style="margin-top:20px; width:100%; height:50px;" onclick="go('list')">← BACK</button>
+            <textarea id="f-memo" rows="4" placeholder="메모..."></textarea>
+            <button onclick="save()" style="width:100%; padding:18px; background:var(--accent); color:#000; border:none; border-radius:8px; font-weight:bold;">SAVE</button>
+            <button class="btn-s" style="margin-top:20px; width:100%;" onclick="go('list')">← BACK</button>
         </section>
     </main>
 </div>
 
 <div id="detail">
-    <button onclick="closeDetail()" style="position:fixed; top:25px; left:20px; z-index:3000; background:rgba(255,255,255,0.2); color:#fff; border:none; width:45px; height:45px; border-radius:50%; font-size:20px;">←</button>
+    <button onclick="closeDetail()" style="position:fixed; top:20px; left:20px; z-index:3000; background:rgba(255,255,255,0.15); color:#fff; border:none; width:45px; height:45px; border-radius:50%; font-size:20px;">←</button>
     <div class="d-flex">
-        <div class="d-left"><img id="d-img" style="max-width:90%; max-height: 80vh; box-shadow: 0 0 50px rgba(0,242,255,0.1);"></div>
+        <div class="d-left"><img id="d-img" style="max-width:90%;"></div>
         <div class="d-right">
-            <h1 id="d-title" style="margin:0; font-size:32px;"></h1>
+            <h1 id="d-title" style="margin:0;"></h1>
             <p id="d-artist" style="font-size:20px; color:var(--dim); margin: 10px 0 30px 0;"></p>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:25px; border-top:1px solid #222; padding-top:25px;">
-                <div><label style="font-size:11px; color:var(--dim);">COUNTRY</label><div id="d-c"></div></div>
-                <div><label style="font-size:11px; color:var(--dim);">STATUS</label><div id="d-s"></div></div>
-                <div><label style="font-size:11px; color:var(--dim);">RELEASE</label><div id="d-rd"></div></div>
-                <div><label style="font-size:11px; color:var(--dim);">PURCHASE</label><div id="d-pd"></div></div>
-                <div><label style="font-size:11px; color:var(--dim);">LIST PRICE</label><div id="d-lp"></div></div>
-                <div><label style="font-size:11px; color:var(--dim);">PURCHASE PRICE</label><div id="d-pp"></div></div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; border-top:1px solid #222; padding-top:20px;">
+                <div><label style="font-size:10px; color:var(--dim);">COUNTRY</label><div id="d-c"></div></div>
+                <div><label style="font-size:10px; color:var(--dim);">STATUS</label><div id="d-s"></div></div>
+                <div><label style="font-size:10px; color:var(--dim);">RELEASE</label><div id="d-rd"></div></div>
+                <div><label style="font-size:10px; color:var(--dim);">PURCHASE</label><div id="d-pd"></div></div>
+                <div><label style="font-size:10px; color:var(--dim);">LIST PRICE</label><div id="d-lp"></div></div>
+                <div><label style="font-size:10px; color:var(--dim);">PURCHASE PRICE</label><div id="d-pp"></div></div>
             </div>
-            <div id="d-memo" style="margin-top:30px; background:#111; padding:20px; border-radius:12px; line-height:1.6; white-space:pre-wrap;"></div>
+            <div id="d-memo" style="margin-top:30px; background:#111; padding:20px; border-radius:8px; white-space:pre-wrap;"></div>
             <div style="margin-top:40px; display:flex; gap:15px;">
-                <button onclick="startEdit()" style="flex:1; padding:18px; background:#222; color:#fff; border:1px solid #444; border-radius:10px; font-weight:bold;">EDIT</button>
-                <button id="del-btn" style="flex:1; padding:18px; background:none; color:#ff4d4d; border:1px solid #ff4d4d; border-radius:10px; font-weight:bold;">DELETE</button>
+                <button onclick="openEdit()" style="flex:1; padding:15px; background:#222; color:#fff; border:1px solid #444; border-radius:8px;">수정</button>
+                <button id="delBtn" style="flex:1; padding:15px; background:none; color:#ff4444; border:1px solid #ff4444; border-radius:8px;">삭제</button>
             </div>
         </div>
     </div>
 </div>
 
 <div id="batch-bar">
-    <span id="sel-count">0 SELECTED</span>
+    <span id="selCnt">0개 선택됨</span>
     <div style="display:flex; gap:10px;">
-        <button onclick="toggleEditMode()" style="background:none; border:1px solid #000; padding:10px 20px; border-radius:6px; font-weight:bold;">CANCEL</button>
-        <button onclick="batchDelete()" style="background:#000; color:#fff; border:none; padding:10px 20px; border-radius:6px; font-weight:bold;">DELETE ALL</button>
+        <button onclick="toggleSelectMode()" style="background:none; border:1px solid #000; padding:8px 15px; border-radius:4px;">취소</button>
+        <button onclick="batchDelete()" style="background:#000; color:#fff; border:none; padding:8px 15px; border-radius:4px;">선택 삭제</button>
     </div>
 </div>
 
 <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwpc0RuF_esK0M3oRQq38GDgCDWorg4GzXHB_Fv9y2R9u1_2eBUyS8GoSz-6vubIF7m/exec';
-    const ACCESS_PIN = '142857'; 
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbywZWVK0YHxntYdTE2-SMQhmhKncdq4fU4yuDfQ3CLEKUvGUuKcFGFQNIiGzGhP6UXM/exec';
+    const PASSWORD = '142857'; // 초기 비밀번호
 
-    let db = [], selectedIds = [], isEditMode = false, vMode = 'grid', sortKey = 'id', isAsc = false;
-    let f_country = 'All', f_owned = 'All', currentImgB64 = "";
+    let db = [], selectedIds = [], isEditMode = false, viewMode = 'grid', sortKey = 'id', isAsc = false;
+    let filterC = 'All', filterO = 'All', tempBase64 = "";
 
-    window.onload = () => { if(localStorage.getItem('v_auth') === 'true') init(); else document.getElementById('login-screen').style.display='block'; };
-    function login() { if(document.getElementById('pw-input').value === ACCESS_PIN) { localStorage.setItem('v_auth', 'true'); init(); } else alert('Access Denied'); }
+    window.onload = () => { if(localStorage.getItem('vinyl_auth') === 'true') startApp(); else document.getElementById('loginPage').style.display='block'; };
+    function doLogin() { if(document.getElementById('pin').value === PASSWORD) { localStorage.setItem('vinyl_auth', 'true'); startApp(); } else alert('틀렸습니다.'); }
 
-    async function init() {
-        document.getElementById('login-screen').style.display = 'none';
+    async function startApp() {
+        document.getElementById('loginPage').style.display = 'none';
         document.getElementById('app').style.display = 'block';
-        await load();
+        await loadData();
     }
 
-    async function load() {
-        loading(true, 'FETCHING ARCHIVE...');
-        try { const r = await fetch(SCRIPT_URL); db = await r.json(); render(); } catch(e) { console.error(e); }
-        loading(false);
+    async function loadData() {
+        showLoading(true, '데이터 로드 중...');
+        try { const r = await fetch(GAS_URL); db = await r.json(); render(); } catch(e) { console.error(e); }
+        showLoading(false);
     }
 
     function go(page) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(page).classList.add('active');
-        document.getElementById('back-btn').style.display = (page === 'list' ? 'none' : 'block');
+        document.getElementById('navBack').style.display = (page === 'list' ? 'none' : 'block');
         document.getElementById('toolbar').style.display = (page === 'list' ? 'flex' : 'none');
-        if(page === 'add') { document.getElementById('edit-id').value = ""; resetForm(); }
+        if(page === 'add') { document.getElementById('eid').value = ""; resetForm(); }
     }
 
-    function fmtDate(s) {
+    function formatDateDisplay(s) {
         if(!s || s.length < 10) return s || '-';
         const [y, m, d] = s.split('-');
         return `${y}년 ${parseInt(m)}월 ${parseInt(d)}일`;
     }
 
-    async function compressImg(file) {
+    async function processImg(file) {
         return new Promise(res => {
             const reader = new FileReader(); reader.readAsDataURL(file);
             reader.onload = (e) => {
@@ -208,172 +205,169 @@
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
                     const size = Math.min(img.width, img.height);
-                    canvas.width = 800; canvas.height = 800;
+                    canvas.width = 600; canvas.height = 600;
                     const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, (img.width-size)/2, (img.height-size)/2, size, size, 0, 0, 800, 800);
+                    // 1:1 크롭 및 압축
+                    ctx.drawImage(img, (img.width-size)/2, (img.height-size)/2, size, size, 0, 0, 600, 600);
                     res(canvas.toDataURL('image/jpeg', 0.8));
                 };
             };
         });
     }
 
-    async function handleImage(input) {
+    async function handleFile(input) {
         if(!input.files.length) return;
         if(input.files.length > 1) { // 일괄 업로드
-            loading(true, 'BATCH UPLOADING...');
+            showLoading(true, '일괄 업로드 중...');
             for(let f of input.files) {
-                const b64 = await compressImg(f);
-                const payload = {
-                    action: 'add', id: Date.now() + Math.random().toString(36).substr(2, 5), 
-                    owned: true, title: 'NEW ENTRY', artist: '-', country: '기타',
+                const b64 = await processImg(f);
+                await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({
+                    action: 'add', id: 'v' + Date.now() + Math.random().toString(36).substr(2, 5), 
+                    owned: true, title: '정보 없음', artist: '-', country: '기타',
                     l_curr: '₩', l_ex: 1, p_curr: '₩', p_ex: 1, list_price: 0, purchase_price: 0,
                     release_date: '', purchase_date: new Date().toISOString().split('T')[0], image: b64
-                };
-                await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                })});
             }
             location.reload();
-        } else { currentImgB64 = await compressImg(input.files[0]); }
+        } else { tempBase64 = await processImg(input.files[0]); }
     }
 
-    function setSort(key) {
+    function sort(key) {
         if(sortKey === key) isAsc = !isAsc;
         else { sortKey = key; isAsc = (key === 'id' ? false : true); }
         render();
     }
 
     function render() {
-        const today = new Date().toISOString().split('T')[0];
-        let filtered = db.filter(i => (f_country === 'All' || i.country === f_country));
-        if(f_owned !== 'All') filtered = filtered.filter(i => (f_owned === '보유' ? i.owned : !i.owned));
+        const now = new Date().toISOString().split('T')[0];
+        let filtered = db.filter(i => (filterC === 'All' || i.country === filterC));
+        if(filterO !== 'All') filtered = filtered.filter(i => (filterO === '보유' ? i.owned : !i.owned));
         
-        const jaCollator = new Intl.Collator('ja', { sensitivity: 'base' });
+        const jaColl = new Intl.Collator('ja', { sensitivity: 'base' });
         filtered.sort((a, b) => {
             let vA = a[sortKey], vB = b[sortKey];
             if(sortKey === 'price') {
                 vA = Number(a.list_price||0) * Number(a.l_ex||1);
                 vB = Number(b.list_price||0) * Number(b.l_ex||1);
             } else if(sortKey === 'country') {
-                const p = {"한국":1, "일본":2, "기타":3};
-                vA = p[vA]||9; vB = p[vB]||9;
+                const order = {"한국":1, "일본":2, "기타":3};
+                vA = order[vA]||9; vB = order[vB]||9;
             } else if(['title', 'artist'].includes(sortKey)) {
-                const getPriority = (s) => {
+                const getP = (s) => {
                     const c = String(s||"").charAt(0);
                     if(/[ㄱ-ㅎ가-힣]/.test(c)) return 1;
                     if(/[\u3040-\u30ff\u4e00-\u9faf]/.test(c)) return 2;
                     return 3;
                 };
-                const pA = getPriority(vA), pB = getPriority(vB);
+                const pA = getP(vA), pB = getP(vB);
                 if(pA !== pB) return isAsc ? pA - pB : pB - pA;
-                return isAsc ? jaCollator.compare(vA, vB) : jaCollator.compare(vB, vA);
+                return isAsc ? jaColl.compare(vA, vB) : jaColl.compare(vB, vA);
             }
             if(vA < vB) return isAsc ? -1 : 1;
             if(vA > vB) return isAsc ? 1 : -1;
             return 0;
         });
 
-        document.getElementById('total-count').innerText = `TOTAL: ${filtered.length}`;
+        document.getElementById('totalCount').innerText = `TOTAL: ${filtered.length}`;
         document.querySelectorAll('.btn-s').forEach(b => {
             b.classList.remove('active');
             if(b.id === 's-'+sortKey) { b.classList.add('active'); b.innerText = b.innerText.split(' ')[0] + (isAsc ? ' ↑' : ' ↓'); }
         });
 
-        if(vMode === 'grid') {
-            document.getElementById('table-view').style.display = 'none';
-            document.getElementById('grid-view').style.display = 'grid';
-            document.getElementById('grid-view').innerHTML = filtered.map(i => {
-                const isDim = (!i.owned || (i.release_date && i.release_date > today)) ? 'is-dimmed' : '';
+        if(viewMode === 'grid') {
+            document.getElementById('t-view').style.display = 'none';
+            document.getElementById('g-view').style.display = 'grid';
+            document.getElementById('g-view').innerHTML = filtered.map(i => {
+                const isDim = (!i.owned || (i.release_date && i.release_date > now)) ? 'is-dimmed' : '';
                 const isSel = selectedIds.includes(String(i.id)) ? 'selected' : '';
-                return `<div class="lp-item ${isDim} ${isSel}" onclick="itemAction('${i.id}')"><img src="${i.image}"></div>`;
+                return `<div class="lp-item ${isDim} ${isSel}" onclick="clickItem('${i.id}')"><img src="${i.image}"></div>`;
             }).join('');
         } else {
-            document.getElementById('grid-view').style.display = 'none';
-            document.getElementById('table-view').style.display = 'block';
-            document.getElementById('table-body').innerHTML = filtered.map((i, idx) => {
+            document.getElementById('g-view').style.display = 'none';
+            document.getElementById('t-view').style.display = 'block';
+            document.getElementById('t-body').innerHTML = filtered.map((i, idx) => {
                 const isSel = selectedIds.includes(String(i.id)) ? 'selected' : '';
-                return `<tr onclick="itemAction('${i.id}')" class="${isSel}"><td>${idx+1}</td><td><img src="${i.image}" class="t-img"></td><td>${i.title}</td><td>${i.artist}</td><td>${i.release_date}</td><td>${i.purchase_date}</td></tr>`;
+                return `<tr onclick="clickItem('${i.id}')" class="${isSel}"><td>${idx+1}</td><td><img src="${i.image}" class="t-img"></td><td>${i.title}</td><td>${i.artist}</td><td>${i.release_date}</td><td>${i.purchase_date}</td></tr>`;
             }).join('');
         }
     }
 
-    function itemAction(id) {
+    function clickItem(id) {
         if(isEditMode) {
             const sid = String(id);
             if(selectedIds.includes(sid)) selectedIds = selectedIds.filter(x => x !== sid);
             else selectedIds.push(sid);
-            document.getElementById('sel-count').innerText = `${selectedIds.length} SELECTED`;
+            document.getElementById('selCnt').innerText = `${selectedIds.length}개 선택됨`;
             render();
         } else openDetail(id);
     }
 
     function openDetail(id) {
         const i = db.find(x => String(x.id) === String(id)); if(!i) return;
-        window.activeId = id;
+        window.currentId = id;
         document.getElementById('d-img').src = i.image;
         document.getElementById('d-title').innerText = i.title;
         document.getElementById('d-artist').innerText = i.artist;
         document.getElementById('d-c').innerText = i.country;
         document.getElementById('d-s').innerText = i.owned ? "보유 중" : "미보유";
-        document.getElementById('d-rd').innerText = fmtDate(i.release_date);
-        document.getElementById('d-pd').innerText = fmtDate(i.purchase_date);
+        document.getElementById('d-rd').innerText = formatDateDisplay(i.release_date);
+        document.getElementById('d-pd').innerText = formatDateDisplay(i.purchase_date);
         document.getElementById('d-memo').innerText = i.memo || "";
         
-        const priceTag = (v, c, e) => {
+        const fmtP = (v, c, e) => {
             if(!v || v == 0) return (c||'₩') + " 0";
             if(c === '₩') return `₩ ${Number(v).toLocaleString()}`;
             return `${c}${Number(v).toLocaleString()} (약 ₩${Math.floor(v*e).toLocaleString()})`;
         };
-        document.getElementById('d-lp').innerText = priceTag(i.list_price, i.l_curr, i.l_ex);
-        document.getElementById('d-pp').innerText = priceTag(i.purchase_price, i.p_curr, i.p_ex);
+        document.getElementById('d-lp').innerText = fmtP(i.list_price, i.l_curr, i.l_ex);
+        document.getElementById('d-pp').innerText = fmtP(i.purchase_price, i.p_curr, i.p_ex);
         document.getElementById('detail').style.display = 'block';
-        document.getElementById('del-btn').onclick = () => del(id);
+        document.getElementById('delBtn').onclick = () => delItem(id);
     }
 
     async function save() {
-        loading(true, 'SAVING...');
-        const eid = document.getElementById('edit-id').value;
+        showLoading(true, '저장 중...');
+        const eid = document.getElementById('eid').value;
         const payload = {
-            action: eid ? 'edit' : 'add', id: eid || (Date.now() + Math.random().toString(36).substr(2, 5)),
+            action: eid ? 'edit' : 'add', id: eid || ('v' + Date.now() + Math.random().toString(36).substr(2, 5)),
             owned: document.getElementById('f-owned').checked,
             title: document.getElementById('f-title').value, artist: document.getElementById('f-artist').value,
-            country: document.getElementById('f-country').value, l_curr: document.getElementById('f-l-curr').value,
-            l_ex: document.getElementById('f-l-ex').value, p_curr: document.getElementById('f-p-curr').value,
-            p_ex: document.getElementById('f-p-ex').value, list_price: document.getElementById('f-l-price').value,
-            purchase_price: document.getElementById('f-p-price').value, release_date: document.getElementById('f-rd').value,
+            country: document.getElementById('f-country').value, l_curr: document.getElementById('f-lcurr').value,
+            l_ex: document.getElementById('f-lex').value, p_curr: document.getElementById('f-pcurr').value,
+            p_ex: document.getElementById('f-pex').value, list_price: document.getElementById('f-lprice').value,
+            purchase_price: document.getElementById('f-pprice').value, release_date: document.getElementById('f-rd').value,
             purchase_date: document.getElementById('f-pd').value, memo: document.getElementById('f-memo').value,
-            image: currentImgB64 || (eid ? db.find(x => String(x.id) === String(eid)).image : "")
+            image: tempBase64 || (eid ? db.find(x => String(x.id) === String(eid)).image : "")
         };
-        await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+        await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
         location.reload();
     }
 
-    async function del(id) { if(!confirm('DELETE?')) return; loading(true, 'DELETING...'); await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({action:'delete', id:String(id)}) }); location.reload(); }
-    async function batchDelete() { if(!selectedIds.length || !confirm('DELETE SELECTED?')) return; loading(true, 'BATCH DELETING...'); await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({action:'delete', id:selectedIds}) }); location.reload(); }
+    async function delItem(id) { if(!confirm('삭제하시겠습니까?')) return; showLoading(true, '삭제 중...'); await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({action:'delete', id:String(id)}) }); location.reload(); }
+    async function batchDelete() { if(!selectedIds.length || !confirm('선택한 항목을 모두 삭제하시겠습니까?')) return; showLoading(true, '일괄 삭제 중...'); await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({action:'delete', id:selectedIds}) }); location.reload(); }
 
-    function startEdit() {
-        const i = db.find(x => String(x.id) === String(window.activeId));
+    function openEdit() {
+        const i = db.find(x => String(x.id) === String(window.currentId));
         closeDetail(); go('add');
-        document.getElementById('form-title').innerText = "EDIT ARCHIVE";
-        document.getElementById('edit-id').value = i.id; 
+        document.getElementById('fTitle').innerText = "수정하기";
+        document.getElementById('eid').value = i.id; 
         document.getElementById('f-owned').checked = i.owned;
         document.getElementById('f-title').value = i.title; document.getElementById('f-artist').value = i.artist;
-        document.getElementById('f-country').value = i.country; document.getElementById('f-l-curr').value = i.l_curr; 
-        document.getElementById('f-l-ex').value = i.l_ex; document.getElementById('f-l-price').value = i.list_price; 
-        document.getElementById('f-p-curr').value = i.p_curr; document.getElementById('f-p-ex').value = i.p_ex;
-        document.getElementById('f-p-price').value = i.purchase_price; 
+        document.getElementById('f-country').value = i.country; document.getElementById('f-lcurr').value = i.l_curr; 
+        document.getElementById('f-lex').value = i.l_ex; document.getElementById('f-lprice').value = i.list_price; 
+        document.getElementById('f-pcurr').value = i.p_curr; document.getElementById('f-pex').value = i.p_ex;
+        document.getElementById('f-pprice').value = i.purchase_price; 
         document.getElementById('f-rd').value = i.release_date; document.getElementById('f-pd').value = i.purchase_date;
         document.getElementById('f-memo').value = i.memo;
     }
 
-    function toggleView() { vMode = (vMode==='grid'?'table':'grid'); document.getElementById('view-icon').innerText = (vMode==='grid'?'▦':'≡'); render(); }
-    function toggleEditMode() { isEditMode = !isEditMode; selectedIds = []; document.getElementById('batch-bar').style.display = (isEditMode?'flex':'none'); render(); }
-    function filterBy(type) {
-        if(type === 'country') { const c = ['All', '한국', '일본', '기타']; f_country = c[(c.indexOf(f_country) + 1) % c.length]; document.getElementById('f-c').innerText = `나라: ${f_country}`; }
-        else { const o = ['All', '보유', '미보유']; f_owned = o[(o.indexOf(f_owned) + 1) % o.length]; document.getElementById('f-o').innerText = `보유여부: ${f_owned}`; }
-        render();
-    }
-    function loading(s, t) { document.getElementById('load-msg').innerText = t; document.getElementById('loading-overlay').style.display = s ? 'flex' : 'none'; }
+    function toggleView() { viewMode = (viewMode==='grid'?'table':'grid'); document.getElementById('viewToggle').innerText = (viewMode==='grid'?'▦':'≡'); render(); }
+    function toggleSelectMode() { isEditMode = !isEditMode; selectedIds = []; document.getElementById('batch-bar').style.display = (isEditMode?'flex':'none'); render(); }
+    function fC() { const c = ['All', '한국', '일본', '기타']; filterC = c[(c.indexOf(filterC) + 1) % c.length]; document.getElementById('fc').innerText = `나라: ${filterC}`; render(); }
+    function fO() { const o = ['All', '보유', '미보유']; filterO = o[(o.indexOf(filterO) + 1) % o.length]; document.getElementById('fo').innerText = `보유여부: ${filterO}`; render(); }
+    function showLoading(s, t) { document.getElementById('lmsg').innerText = t; document.getElementById('loader').style.display = s ? 'flex' : 'none'; }
     function closeDetail() { document.getElementById('detail').style.display = 'none'; }
-    function resetForm() { currentImgB64 = ""; document.getElementById('f-title').value = ""; document.getElementById('f-artist').value = ""; document.getElementById('f-img').value = ""; }
+    function resetForm() { tempBase64 = ""; document.getElementById('f-title').value = ""; document.getElementById('f-artist').value = ""; document.getElementById('f-img').value = ""; }
 </script>
 </body>
 </html>
