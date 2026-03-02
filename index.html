@@ -348,29 +348,28 @@
 // 상세 창에서의 단일 삭제
 async function delItem(id) {
     if (!id || id === 'undefined') {
-        alert("ID가 유효하지 않습니다. 페이지를 새로고침 후 다시 시도해주세요.");
+        alert("ID가 유효하지 않습니다. 새로고침 후 다시 시도해주세요.");
         return;
     }
     if (!confirm('정말 이 앨범을 삭제하시겠습니까?')) return;
 
     showLoading(true, '앨범 삭제 중...');
     try {
-        // GAS에 삭제 요청 전송
         await fetch(GAS_URL, {
             method: 'POST',
-            mode: 'no-cors', // CORS 문제 방지
+            mode: 'no-cors', 
             body: JSON.stringify({ action: 'delete', id: String(id) })
         });
         
-        // no-cors 모드에서는 응답을 읽을 수 없으므로 잠시 대기 후 강제 새로고침
-        setTimeout(() => { location.reload(); }, 1000);
+        // 요청 후 시트 반영 시간을 위해 1.2초 대기 후 새로고침
+        setTimeout(() => { location.reload(); }, 1200);
     } catch (e) {
-        alert("통신 오류 발생");
+        alert("통신 오류가 발생했습니다.");
         showLoading(false);
     }
 }
 
-// 일괄 삭제
+// 일괄 선택 삭제
 async function batchDelete() {
     if (!selectedIds.length) return;
     if (!confirm(`${selectedIds.length}개의 항목을 삭제하시겠습니까?`)) return;
@@ -382,7 +381,7 @@ async function batchDelete() {
             mode: 'no-cors',
             body: JSON.stringify({ action: 'delete', id: selectedIds.map(String) })
         });
-        setTimeout(() => { location.reload(); }, 1500);
+        setTimeout(() => { location.reload(); }, 1800);
     } catch (e) {
         alert("삭제 중 오류가 발생했습니다.");
         showLoading(false);
@@ -414,5 +413,6 @@ async function batchDelete() {
 </script>
 </body>
 </html>
+
 
 
