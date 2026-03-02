@@ -345,45 +345,48 @@
         location.reload();
     }
 
-// 상세 창에서의 단일 삭제
+// 상세 페이지 내 삭제 버튼 함수
 async function delItem(id) {
-    if (!id || id === 'undefined') {
-        alert("ID가 유효하지 않습니다. 새로고침 후 다시 시도해주세요.");
-        return;
-    }
+    if (!id) { alert("ID 오류"); return; }
     if (!confirm('정말 이 앨범을 삭제하시겠습니까?')) return;
 
-    showLoading(true, '앨범 삭제 중...');
+    showLoading(true, '삭제 중...');
     try {
         await fetch(GAS_URL, {
             method: 'POST',
-            mode: 'no-cors', 
-            body: JSON.stringify({ action: 'delete', id: String(id) })
+            mode: 'no-cors', // GAS 보안 정책 대응
+            body: JSON.stringify({
+                action: 'delete',
+                id: String(id) // ID를 문자열로 확실하게 전달
+            })
         });
-        
-        // 요청 후 시트 반영 시간을 위해 1.2초 대기 후 새로고침
-        setTimeout(() => { location.reload(); }, 1200);
+
+        // 삭제 반영 시간을 위해 1.5초 후 새로고침
+        setTimeout(() => { location.reload(); }, 1500);
     } catch (e) {
-        alert("통신 오류가 발생했습니다.");
+        alert("통신 오류");
         showLoading(false);
     }
 }
 
-// 일괄 선택 삭제
+// 일괄 삭제 함수
 async function batchDelete() {
-    if (!selectedIds.length) return;
-    if (!confirm(`${selectedIds.length}개의 항목을 삭제하시겠습니까?`)) return;
+    if (selectedIds.length === 0) return;
+    if (!confirm(selectedIds.length + '개의 앨범을 삭제하시겠습니까?')) return;
 
     showLoading(true, '일괄 삭제 중...');
     try {
         await fetch(GAS_URL, {
             method: 'POST',
             mode: 'no-cors',
-            body: JSON.stringify({ action: 'delete', id: selectedIds.map(String) })
+            body: JSON.stringify({
+                action: 'delete',
+                id: selectedIds.map(String)
+            })
         });
-        setTimeout(() => { location.reload(); }, 1800);
+        setTimeout(() => { location.reload(); }, 2000);
     } catch (e) {
-        alert("삭제 중 오류가 발생했습니다.");
+        alert("삭제 실패");
         showLoading(false);
     }
 }
@@ -413,6 +416,7 @@ async function batchDelete() {
 </script>
 </body>
 </html>
+
 
 
 
