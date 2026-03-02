@@ -9,27 +9,27 @@
         * { box-sizing: border-box; font-family: 'Pretendard', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: var(--bg); color: var(--text); overflow-x: hidden; }
         
-        /* 애니메이션 */
-        .page { display: none; opacity: 0; transition: 0.3s ease; }
-        .page.active { display: block; opacity: 1; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { transform: translateY(5px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        /* 트랜지션 및 애니메이션 */
+        .page { display: none; opacity: 0; transition: transform 0.3s ease, opacity 0.3s ease; }
+        .page.active { display: block; opacity: 1; animation: slideUp 0.4s ease; }
+        @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         nav { position: fixed; top: 0; width: 100%; height: 60px; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); z-index: 1000; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; }
         .toolbar { position: fixed; top: 60px; width: 100%; background: var(--bg); z-index: 900; border-bottom: 1px solid var(--border); padding: 10px; display: flex; align-items: center; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
-        .btn-s { padding: 6px 14px; border-radius: 20px; background: #1a1a1a; border: 1px solid var(--border); color: var(--dim); font-size: 11px; margin-right: 6px; cursor: pointer; }
+        .btn-s { padding: 6px 14px; border-radius: 20px; background: #1a1a1a; border: 1px solid var(--border); color: var(--dim); font-size: 11px; margin-right: 6px; cursor: pointer; transition: 0.2s; }
         .btn-s.active { border-color: var(--accent); color: var(--accent); background: rgba(0, 242, 255, 0.1); }
         .total-box { position: fixed; top: 72px; right: 15px; font-size: 13px; font-weight: bold; color: var(--accent); z-index: 950; }
 
         main { padding: 125px 10px 80px; }
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-        @media (min-width: 768px) { .grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; } }
+        @media (min-width: 800px) { .grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; } }
         
-        .lp-item { aspect-ratio: 1/1; background: #080808; border-radius: 4px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: 0.2s; position: relative; }
+        .lp-item { aspect-ratio: 1/1; background: #080808; border-radius: 4px; overflow: hidden; cursor: pointer; border: 2px solid transparent; position: relative; }
         .lp-item img { width: 100%; height: 100%; object-fit: cover; }
         .lp-item.selected { border-color: var(--accent); }
         .lp-item.selected::after { content: '✓'; position: absolute; inset: 0; background: rgba(0,242,255,0.4); display: flex; align-items: center; justify-content: center; font-size: 30px; color: #fff; font-weight: bold; }
         
-        .is-dimmed { opacity: 0.3; filter: brightness(1.6); }
+        .is-dimmed { opacity: 0.3; filter: brightness(1.7); }
 
         #detail { position: fixed; inset: 0; background: #000; z-index: 2000; display: none; overflow-y: auto; }
         .d-flex { display: flex; min-height: 100vh; }
@@ -42,14 +42,15 @@
         .t-img { width: 45px; height: 45px; object-fit: cover; border-radius: 4px; }
 
         input, select, textarea { width: 100%; padding: 14px; background: #111; border: 1px solid #333; color: #fff; border-radius: 8px; margin-bottom: 12px; font-size: 14px; }
-        .price-row { display: grid; grid-template-columns: 80px 1fr 1fr; gap: 8px; }
+        .price-row { display: grid; grid-template-columns: 80px 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        .price-row input, .price-row select { margin-bottom: 0; }
         #batch-bar { position: fixed; bottom: 0; width: 100%; height: 70px; background: var(--accent); color: #000; display: none; align-items: center; justify-content: space-between; padding: 0 20px; font-weight: bold; z-index: 1500; }
         #loader { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
 
-<div id="loader"><div id="lmsg" style="color:var(--accent); font-weight: bold;">PROCESSING...</div></div>
+<div id="loader"><div id="lmsg" style="color:var(--accent); font-weight: bold;">ARCHIVING...</div></div>
 
 <div id="loginPage" style="display:none; text-align:center; padding-top:35vh;">
     <h1 style="letter-spacing:10px; margin-bottom:40px;">VINYL ARCHIVE</h1>
@@ -90,13 +91,14 @@
                     <thead><tr><th>No</th><th>사진</th><th>앨범명</th><th>가수명</th><th>발매일</th><th>구매일</th></tr></thead>
                     <tbody id="t-body"></tbody>
                 </table>
+                <button class="btn-s" style="margin-top:20px;" onclick="go('list')">← BACK</button>
             </div>
         </section>
 
         <section id="add" class="page">
-            <h2 id="fTitle">정보 입력</h2>
+            <h2 id="fTitle">NEW ARCHIVE</h2>
             <input type="hidden" id="eid">
-            <label style="display:flex; align-items:center; gap:10px; margin-bottom:15px;"><input type="checkbox" id="f-owned" checked> 보유 중</label>
+            <label style="display:flex; align-items:center; gap:10px; margin-bottom:15px; font-weight:bold;"><input type="checkbox" id="f-owned" checked> 보유 중</label>
             <input type="file" id="f-img" accept="image/*" multiple onchange="handleFile(this)">
             <input type="text" id="f-title" placeholder="앨범명">
             <input type="text" id="f-artist" placeholder="가수명">
@@ -107,27 +109,27 @@
             
             <div style="display:flex; gap:10px;"><div style="flex:1;"><label style="font-size:11px; color:var(--dim);">발매일</label><input type="date" id="f-rd"></div><div style="flex:1;"><label style="font-size:11px; color:var(--dim);">구매일</label><input type="date" id="f-pd"></div></div>
             <textarea id="f-memo" rows="4" placeholder="메모..."></textarea>
-            <button onclick="save()" style="width:100%; padding:18px; background:var(--accent); color:#000; border:none; border-radius:8px; font-weight:bold;">SAVE</button>
+            <button onclick="save()" id="saveBtn" style="width:100%; padding:18px; background:var(--accent); color:#000; border:none; border-radius:8px; font-weight:bold;">SAVE ARCHIVE</button>
             <button class="btn-s" style="margin-top:20px; width:100%; height:45px;" onclick="go('list')">← BACK</button>
         </section>
     </main>
 </div>
 
 <div id="detail">
-    <button onclick="closeD()" style="position:fixed; top:20px; left:20px; z-index:3000; background:rgba(0,0,0,0.6); color:#fff; border:none; width:45px; height:45px; border-radius:50%; font-size:20px;">←</button>
+    <button onclick="closeD()" style="position:fixed; top:20px; left:20px; z-index:3000; background:rgba(0,0,0,0.6); color:#fff; border:none; width:45px; height:45px; border-radius:50%; font-size:22px;">←</button>
     <div class="d-flex">
-        <div class="d-left"><img id="d-img" style="max-width:90%;"></div>
+        <div class="d-left"><img id="d-img" style="max-width:90%; box-shadow: 0 10px 30px rgba(0,0,0,0.5);"></div>
         <div class="d-right">
-            <h1 id="d-title"></h1><p id="d-artist" style="font-size:20px; color:var(--dim);"></p>
+            <h1 id="d-title" style="margin:0; font-size:32px;"></h1><p id="d-artist" style="font-size:20px; color:var(--dim); margin-bottom:35px;"></p>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:25px; border-top:1px solid #222; padding-top:25px;">
                 <div><label style="font-size:10px; color:var(--dim);">COUNTRY</label><div id="d-c"></div></div>
                 <div><label style="font-size:10px; color:var(--dim);">STATUS</label><div id="d-s"></div></div>
-                <div><label style="font-size:10px; color:var(--dim);">RELEASE</label><div id="d-rd"></div></div>
-                <div><label style="font-size:10px; color:var(--dim);">PURCHASE</label><div id="d-pd"></div></div>
+                <div><label style="font-size:10px; color:var(--dim);">RELEASE DATE</label><div id="d-rd"></div></div>
+                <div><label style="font-size:10px; color:var(--dim);">PURCHASE DATE</label><div id="d-pd"></div></div>
                 <div><label style="font-size:10px; color:var(--dim);">LIST PRICE</label><div id="d-lp"></div></div>
                 <div><label style="font-size:10px; color:var(--dim);">PURCHASE PRICE</label><div id="d-pp"></div></div>
             </div>
-            <div id="d-memo" style="margin-top:30px; background:#111; padding:20px; border-radius:8px; white-space:pre-wrap;"></div>
+            <div id="d-memo" style="margin-top:30px; background:#111; padding:20px; border-radius:8px; line-height:1.6; white-space:pre-wrap;"></div>
             <div style="margin-top:40px; display:flex; gap:15px;">
                 <button onclick="startE()" style="flex:1; padding:15px; background:#222; color:#fff; border:1px solid #444; border-radius:8px;">EDIT</button>
                 <button id="delBtn" style="flex:1; padding:15px; background:none; color:#ff4444; border:1px solid #ff4444; border-radius:8px;">DELETE</button>
@@ -138,18 +140,18 @@
 
 <div id="batch-bar">
     <span id="selCnt">0 SELECTED</span>
-    <div style="display:flex; gap:10px;"><button onclick="toggleE()" style="background:none; border:1px solid #000; padding:8px 15px; border-radius:4px;">CANCEL</button><button onclick="batchDel()" style="background:#000; color:#fff; border:none; padding:8px 15px; border-radius:4px;">BATCH DELETE</button></div>
+    <div style="display:flex; gap:10px;"><button onclick="toggleE()" style="background:none; border:1px solid #000; padding:8px 15px; border-radius:4px;">CANCEL</button><button onclick="batchDel()" style="background:#000; color:#fff; border:none; padding:8px 15px; border-radius:4px;">DELETE ALL</button></div>
 </div>
 
 <script>
-    const G_URL = 'https://script.google.com/macros/s/AKfycbwsDYY5XFjkc3rsm1TFcQsQNBcVaY17vAhaHZXHkeF3oauxDkN0L7v7Sxho3Rvxg_qG/exec';
+    const G_URL = 'https://script.google.com/macros/s/AKfycbxePXEdiNlDyd5eAKd0inuiOhHeFmVJMfS7GRtFJc7Mku0kgMf3Oqxjc_YMZc7zejH-/exec';
     const G_PIN = '142857'; 
 
     let db = [], selIds = [], isEditMode = false, vMode = 'grid', sKey = 'id', isAsc = false;
     let f_c = 'All', f_o = 'All', tempB64 = "";
 
     window.onload = () => { if(localStorage.getItem('v_auth') === 'true') init(); else document.getElementById('loginPage').style.display='block'; };
-    function doLogin() { if(document.getElementById('pin').value === G_PIN) { localStorage.setItem('v_auth', 'true'); init(); } else alert('Denied'); }
+    function doLogin() { if(document.getElementById('pin').value === G_PIN) { localStorage.setItem('v_auth', 'true'); init(); } else alert('Access Denied'); }
 
     async function init() {
         document.getElementById('loginPage').style.display = 'none';
@@ -158,7 +160,7 @@
     }
 
     async function load() {
-        loading(true, 'FETCHING...');
+        loading(true, 'FETCHING ARCHIVE...');
         try { const r = await fetch(G_URL); db = await r.json(); render(); } catch(e) { console.error(e); }
         loading(false);
     }
@@ -185,10 +187,10 @@
                 img.onload = () => {
                     const cvs = document.createElement('canvas');
                     const size = Math.min(img.width, img.height);
-                    cvs.width = 600; cvs.height = 600;
+                    cvs.width = 600; cvs.height = 600; // 압축 해상도
                     const ctx = cvs.getContext('2d');
                     ctx.drawImage(img, (img.width-size)/2, (img.height-size)/2, size, size, 0, 0, 600, 600);
-                    res(cvs.toDataURL('image/jpeg', 0.8));
+                    res(cvs.toDataURL('image/jpeg', 0.8)); // 80% 압축
                 };
             };
         });
@@ -196,16 +198,17 @@
 
     async function handleFile(input) {
         if(!input.files.length) return;
-        if(input.files.length > 1) {
+        if(input.files.length > 1) { // 일괄 업로드
             loading(true, 'BATCH UPLOADING...');
             for(let f of input.files) {
                 const b64 = await procImg(f);
-                await fetch(G_URL, { method: 'POST', body: JSON.stringify({
+                const payload = {
                     action: 'add', id: Date.now() + Math.random().toString(36).substr(2, 5), 
-                    owned: true, title: 'New Vinyl', artist: '-', country: '기타',
+                    owned: true, title: 'New Entry', artist: '-', country: '기타',
                     l_curr: '₩', l_ex: 1, p_curr: '₩', p_ex: 1, list_price: 0, purchase_price: 0,
                     release_date: '', purchase_date: new Date().toISOString().split('T')[0], image: b64
-                })});
+                };
+                await fetch(G_URL, { method: 'POST', body: JSON.stringify(payload) });
             }
             location.reload();
         } else { tempB64 = await procImg(input.files[0]); }
@@ -222,7 +225,7 @@
         let fData = db.filter(i => (f_c === 'All' || i.country === f_c));
         if(f_o !== 'All') fData = fData.filter(i => (f_o === '보유' ? i.owned : !i.owned));
         
-        const jaC = new Intl.Collator('ja', { sensitivity: 'base' });
+        const jaCollator = new Intl.Collator('ja', { sensitivity: 'base' });
         fData.sort((a, b) => {
             let vA = a[sKey], vB = b[sKey];
             if(sKey === 'price') {
@@ -241,7 +244,7 @@
                 };
                 const pA = getP(vA), pB = getP(vB);
                 if(pA !== pB) return isAsc ? pA - pB : pB - pA;
-                return isAsc ? jaC.compare(vA, vB) : jaC.compare(vB, vA);
+                return isAsc ? jaCollator.compare(vA, vB) : jaCollator.compare(vB, vA);
             }
             if(vA < vB) return isAsc ? -1 : 1;
             if(vA > vB) return isAsc ? 1 : -1;
@@ -320,8 +323,8 @@
             purchase_date: document.getElementById('f-pd').value, memo: document.getElementById('f-memo').value,
             image: tempB64 || (eid ? db.find(x => String(x.id) === String(eid)).image : "")
         };
-        await fetch(G_URL, { method: 'POST', body: JSON.stringify(payload) });
-        location.reload();
+        const r = await fetch(G_URL, { method: 'POST', body: JSON.stringify(payload) });
+        if(r.ok) location.reload(); else { alert('Save Failed'); loading(false); }
     }
 
     async function del(id) { if(!confirm('DELETE?')) return; loading(true, 'DELETING...'); await fetch(G_URL, { method: 'POST', body: JSON.stringify({action:'delete', id:String(id)}) }); location.reload(); }
@@ -330,7 +333,7 @@
     function startE() {
         const i = db.find(x => String(x.id) === String(window.activeId));
         closeD(); go('add');
-        document.getElementById('fTitle').innerText = "EDIT";
+        document.getElementById('fTitle').innerText = "EDIT ARCHIVE";
         document.getElementById('eid').value = i.id; 
         document.getElementById('f-owned').checked = i.owned;
         document.getElementById('f-title').value = i.title; document.getElementById('f-artist').value = i.artist;
